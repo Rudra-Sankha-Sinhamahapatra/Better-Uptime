@@ -41,6 +41,12 @@ export const allWebsites = async (req: Request, res: Response) => {
       const website = await prisma.website.findUnique({
         where: { id: websiteId },
       });
+
+      if (!website) {
+        res.status(404).json({ error: "Website not found" });
+        return;
+      } 
+      
       res.status(200).json(website);
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });

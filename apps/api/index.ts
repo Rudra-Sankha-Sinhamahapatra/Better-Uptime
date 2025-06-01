@@ -13,5 +13,5 @@ app.post("/website", createWebsite);
 app.get("/website/:websiteId", getWebsiteById);
 
 app.listen(3001, () => {
-  console.log("Server is running on port 3000");
+  console.log("Server is running on port 3001");
 });
