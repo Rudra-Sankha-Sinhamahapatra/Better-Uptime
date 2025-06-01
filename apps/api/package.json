@@ -2,15 +2,21 @@
   "name": "api",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "dev": "bun run index.ts",
+    "start": "bun run index.ts"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0",
     "@repo/db": "workspace:*"
   },
   "dependencies": {
-    "@types/express": "^5.0.2",
+    "cors": "^2.8.5",
     "express": "^5.1.0"
   }
 }
