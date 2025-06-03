@@ -9,13 +9,15 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/cors": "^2.8.18",
-    "@types/express": "^5.0.2"
+    "@types/express": "^5.0.2",
+    "@types/amqplib": "^0.10.7"
   },
   "peerDependencies": {
     "typescript": "^5.0.0",
     "@repo/db": "workspace:*"
   },
   "dependencies": {
+    "amqplib": "^0.10.8",
     "cors": "^2.8.5",
     "express": "^5.1.0"
   }

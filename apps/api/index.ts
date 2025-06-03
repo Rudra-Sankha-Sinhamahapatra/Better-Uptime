@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import { allWebsites, createWebsite, getWebsiteById } from "./controllers/website";
+import { connectToRabbitMQ } from "./services/rabbitmq";
+import { config } from "./config";
+import { shutdown } from "./utils/shutdown";
 
 const app = express();
 app.use(express.json());
@@ -12,6 +15,24 @@ app.post("/website", createWebsite);
 
 app.get("/website/:websiteId", getWebsiteById);
 
-app.listen(3001, () => {
-  console.log("Server is running on port 3001");
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+process.on("uncaughtException",  (error)=> {
+  console.error("Uncaught Exception: ", error);
+  shutdown();
 });
+
+const startServer = async () => {
+  try {
+    await connectToRabbitMQ();
+
+    app.listen(config.server.port, () => {
+      console.log(`Server is running on port ${config.server.port}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server", error);
+    process.exit(1);
+  }
+}
+
+startServer();
