@@ -4,10 +4,13 @@ import { allWebsites, createWebsite, getWebsiteById } from "./controllers/websit
 import { connectToRabbitMQ } from "./services/rabbitmq";
 import { config } from "./config";
 import { shutdown } from "./utils/shutdown";
+import { queueHealth } from "./controllers/queue";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+app.get("/queue-health", queueHealth);
 
 app.get("/website", allWebsites);
 

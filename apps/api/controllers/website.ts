@@ -1,5 +1,7 @@
 import prisma from "@repo/db/client";
 import type { Request, Response } from "express";
+import { publishToQueue } from "../services/rabbitmq";
+import type { WebsiteMonitoringMessage } from "../types/queue";
 
 export const allWebsites = async (req: Request, res: Response) => {
     try {
@@ -27,6 +29,15 @@ export const allWebsites = async (req: Request, res: Response) => {
           timeAdded: new Date(),
        },
     });
+
+    const monitoringMessage: WebsiteMonitoringMessage = {
+      websiteId: website.id,
+      url: website.url,
+      name: website.name
+  };
+
+   await publishToQueue(monitoringMessage);
+
     res.status(200).json(website);
     return;
   } catch (error) {
