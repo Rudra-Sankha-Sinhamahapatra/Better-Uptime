@@ -1,6 +1,7 @@
 import amqp from "amqplib";
 import { config } from "../config";
 import type { AmqpChannel, AmqpConnection } from "../types/amqp";
+import type { WebsiteMonitoringMessage } from "../types/queue";
 
 
 let connection: AmqpConnection | null = null;
@@ -36,7 +37,7 @@ export async function connectToRabbitMQ() {
         });
 
         await channel.assertQueue(config.rabbitmq.queueName, {
-            durable: true 
+            durable: true
         });
 
         console.log("Channel Created");
@@ -66,5 +67,56 @@ export const closeQueue = async () => {
     } finally {
         channel = null;
         connection = null;
+    }
+}
+
+export const publishToQueue = async (message: WebsiteMonitoringMessage) => {
+    try {
+        if (!channel) {
+            await connectToRabbitMQ();
+        }
+        if(!channel) throw new Error("Channel not found");
+
+        const messageWithTimeStamp = {
+            ...message,
+            timestamp: Date.now(),
+        }
+
+        const success = await channel.sendToQueue(
+            config.rabbitmq.queueName,
+            Buffer.from(JSON.stringify(messageWithTimeStamp)),
+            {
+                persistent: true,
+                contentType: 'application/json',
+                expiration: '86400000', //24 hrs 
+                timestamp: Date.now(),
+                messageId: message.websiteId
+            }
+        )
+
+        if(success) {
+            console.log("Message published to queue for website: ", message.url);
+        } 
+        
+      return success;
+    } catch (error) {
+        console.error("Error publishing to queue: ", error);
+        throw error;
+    }
+}
+
+export const getQueueStatus = async () => {
+    try {
+        if(!channel) {
+            await connectToRabbitMQ();
+        }
+        if(!channel) throw new Error("Channel not found");
+
+       const queueInfo = await channel.checkQueue(config.rabbitmq.queueName);
+       console.log("Queue status: ", queueInfo);
+       return queueInfo;
+    } catch (error) {
+        console.error("Error getting queue status: ", error);
+        throw error;
     }
 }
