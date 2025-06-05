@@ -105,6 +105,40 @@ export const publishToQueue = async (message: WebsiteMonitoringMessage) => {
     }
 }
 
+export const publishBatchToQueue = async (messages: WebsiteMonitoringMessage[]) => {
+    try {
+        if (!channel) {
+            await connectToRabbitMQ();
+        }
+        if(!channel) throw new Error("Channel not found");
+
+        for (const message of messages) {
+            const messageWithTimeStamp = {
+                ...message,
+                timestamp: Date.now(),
+            }
+
+            await channel.sendToQueue(
+                config.rabbitmq.queueName,
+                Buffer.from(JSON.stringify(messageWithTimeStamp)),
+                {
+                    persistent: true,
+                    contentType: 'application/json',
+                    expiration: '86400000',
+                    timestamp: Date.now(),
+                    messageId: message.websiteId
+                }
+            );
+        }
+        
+        console.log(`Published batch of ${messages.length} messages to queue`);
+        return true;
+    } catch (error) {
+        console.error("Error publishing batch to queue: ", error);
+        throw error;
+    }
+}
+
 export const getQueueStatus = async () => {
     try {
         if(!channel) {
