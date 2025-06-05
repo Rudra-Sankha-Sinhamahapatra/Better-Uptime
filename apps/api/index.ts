@@ -5,6 +5,7 @@ import { connectToRabbitMQ } from "./services/rabbitmq";
 import { config } from "./config";
 import { shutdown } from "./utils/shutdown";
 import { queueHealth } from "./controllers/queue";
+import { startScheduler } from "./services/scheduler";
 
 const app = express();
 app.use(express.json());
@@ -29,6 +30,7 @@ const startServer = async () => {
   try {
     await connectToRabbitMQ();
 
+    await startScheduler();
     app.listen(config.server.port, () => {
       console.log(`Server is running on port ${config.server.port}`);
     });
