@@ -33,6 +33,8 @@ const startWorker = async () => {
     try {
       const connection = await amqp.connect(config.rabbitmq.rabbitMqUrl as string);
       const channel = await connection.createChannel();
+
+      await channel.prefetch(10);
       
       await channel.assertQueue(config.rabbitmq.queueName, {
         durable: true,
@@ -40,6 +42,11 @@ const startWorker = async () => {
 
       console.log("Worker ready to process messages");
 
+      const defaultRegion = await prisma.region.findFirst();
+      if (!defaultRegion) {
+          throw new Error("No regions configured");
+      }
+      
       channel.consume(config.rabbitmq.queueName, async (message) => {
         if(!message) return;
 
@@ -50,12 +57,13 @@ const startWorker = async () => {
                 url: data.url
             });
 
-            const defaultRegion = await prisma.region.findFirst();
-            if (!defaultRegion) {
-                throw new Error("No regions configured");
+            const result = await checkWebsite(data.url);
+            if(!result) {
+                console.error("No result from checkWebsite",data.url);
+                channel.nack(message,false,false);
+                return;
             }
 
-            const result = await checkWebsite(data.url);
             const tick = await prisma.websiteTick.create({
                 data: {
                     response_time_ms:result.responseTimeMs,
@@ -66,7 +74,7 @@ const startWorker = async () => {
             });
 
             if(result.status === WebsiteStatus.Down) {
-                console.log(`Check completed for ${data.url} with status ${result.status}, result: `,result);
+                console.log(`Check completed for ${data.url} with status ${result.status}, response status: ${result.responseStatus}, result: `,result);
                 // Will send an email to the user
             }
 
