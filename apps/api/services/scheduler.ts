@@ -19,12 +19,12 @@ export const startScheduler = () => {
                 OR: [
                     // Websites with no ticks
                     { websiteTicks: { none: {} } },
-                    // Websites not checked in last 5 minutes
+                   // Case 2: Latest tick is older than 5 minutes
                     {
                         websiteTicks: {
-                            every: {
+                            none: {
                                 createdAt: {
-                                    lt: new Date(Date.now() - MIN_CHECK_INTERVAL)
+                                    gte: new Date(Date.now() - MIN_CHECK_INTERVAL)
                                 }
                             }
                         }
@@ -36,10 +36,16 @@ export const startScheduler = () => {
                 url: true,
                 timeAdded: true,
                 name: true,
+                websiteTicks: {
+                    orderBy: {
+                        createdAt: "desc",
+                    },
+                    take: 1,
+                }
             },
             orderBy: {
                 timeAdded: "asc",
-            }
+            },
         });
 
         if(websites.length > 0) {
