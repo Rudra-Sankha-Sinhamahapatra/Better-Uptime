@@ -5,10 +5,26 @@ import type { WebsiteMonitoringMessage } from "../types/queue";
 
 export const allWebsites = async (req: Request, res: Response) => {
     try {
-      const websites = await prisma.website.findMany();
-      res.status(200).json(websites);
+      const websites = await prisma.website.findMany({
+        include: {
+          websiteTicks: {
+            orderBy: {
+              createdAt: 'desc'
+            },
+            take: 1,
+          }
+        }
+      });
+
+      const websitesWithLatestTick = websites.map(website => ({
+        ...website,
+        latestTick: website.websiteTicks[0] || null
+      }));
+
+      res.status(200).json(websitesWithLatestTick);
       return;
     } catch (error) {
+      console.error('Error fetching websites:', error);
       res.status(500).json({ error: "Internal server error" });
       return;
     }
@@ -51,14 +67,27 @@ export const allWebsites = async (req: Request, res: Response) => {
       const { websiteId } = req.params;
       const website = await prisma.website.findUnique({
         where: { id: websiteId },
+        include: {
+          websiteTicks: {
+            orderBy: {
+              createdAt: 'desc'
+            },
+            take: 1,
+          }
+        }
       });
 
       if (!website) {
         res.status(404).json({ error: "Website not found" });
         return;
       } 
+
+      const websiteWithLatestTick = {
+        ...website,
+        latestTick: website.websiteTicks[0] || null,
+      };
       
-      res.status(200).json(website);
+      res.status(200).json(websiteWithLatestTick);
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
       return;
