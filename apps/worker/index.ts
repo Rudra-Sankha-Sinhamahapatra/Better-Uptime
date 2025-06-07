@@ -42,9 +42,13 @@ const startWorker = async () => {
 
       console.log("Worker ready to process messages");
 
-      const defaultRegion = await prisma.region.findFirst();
+     let defaultRegion = await prisma.region.findFirst();
       if (!defaultRegion) {
-          throw new Error("No regions configured");
+         defaultRegion = await prisma.region.create({
+            data: {
+                name: "Mumbai,India",
+            }
+          })
       }
       
       channel.consume(config.rabbitmq.queueName, async (message) => {
