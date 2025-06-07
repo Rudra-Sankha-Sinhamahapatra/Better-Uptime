@@ -13,12 +13,77 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  website       Website[]
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+
 model Website {
   id        String   @id @default(uuid())
   name      String
   url       String
   timeAdded DateTime
-  websiteTicks WebsiteTick[]
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  websiteTicks WebsiteTick[] @relation("WebsiteTicks")
+
 }
 
 model Region {
@@ -33,7 +98,7 @@ model WebsiteTick {
   status             WebsiteStatus
   region             Region   @relation(fields: [regionId], references: [id])
   regionId           String
-  website            Website  @relation(fields: [websiteId], references: [id])
+  website            Website  @relation("WebsiteTicks", fields: [websiteId], references: [id],onDelete: Cascade)
   websiteId          String
 
   createdAt DateTime @default(now())
