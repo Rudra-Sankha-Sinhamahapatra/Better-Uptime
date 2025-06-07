@@ -1,5 +1,9 @@
+"use client";
+
 import Image from "next/image"
 import Link from "next/link"
+import { UserProfile } from "./UserProfile"
+import { Session } from "@/types/session"
 
 export const Navbar = () => {
     return (
@@ -32,18 +36,24 @@ export const Navbar = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <Link 
-                            href="/login" 
-                            className="text-gray-300 hover:text-white transition-colors"
-                        >
-                            Log in
-                        </Link>
-                        <Link 
-                            href="/signup" 
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-                        >
-                            Get Started
-                        </Link>
+                        <UserProfile> 
+                            {(session: Session | null) => !session && (
+                                <>
+                                    <Link 
+                                        href="/signin" 
+                                        className="text-gray-300 hover:text-white transition-colors"
+                                    >
+                                        Log in
+                                    </Link>
+                                    <Link 
+                                        href="/signin" 
+                                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                                    >
+                                        Get Started
+                                    </Link>
+                                </>
+                            )}
+                        </UserProfile>
                     </div>
                 </div>
             </div>

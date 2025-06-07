@@ -6,6 +6,9 @@ import { useEffect, useState } from "react"
 import { WebsitesGradient } from "./WebsitesGradient";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { authClient } from "@/lib/auth-client";
+import { AddWebsite } from "./AddWebsite";
+import { NoWebsites } from "./NoWebsites";
 
 export default function Websites() {
     const [websites, setWebsites] = useState<Website[]>([]);
@@ -14,7 +17,19 @@ export default function Websites() {
 
     const fetchWebsites = async () => {
         try {
-            const response = await fetch(`${config.backendUrl}/website`);
+            const session = await authClient.getSession();
+
+            const response = await fetch(`${config.backendUrl}/website`, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.data?.session.token}`,
+                },
+            });
+            if(!response.ok) {
+                console.log(`Failed to fetch websites, status: ${response.status}`);
+                return;
+            }
             const data = await response.json();
             setWebsites(data);
             setLoading(false);
@@ -32,7 +47,7 @@ export default function Websites() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full">
+            <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-sm">
                 <div className="relative w-16 h-16">
                     <div className="absolute inset-0 border-4 border-green-500/20 rounded-full"></div>
                     <div className="absolute inset-0 border-4 border-green-500 rounded-full animate-spin border-t-transparent"></div>
@@ -42,7 +57,7 @@ export default function Websites() {
     }
 
     return (
-        <div className="h-full">
+        <div className="relative min-h-screen pt-20">
             <WebsitesGradient/>
 
             <div className="relative z-10 p-8 pt-16 max-w-7xl mx-auto">
@@ -53,17 +68,11 @@ export default function Websites() {
                     <p className="text-gray-400 text-lg max-w-2xl mx-auto">
                         Real-time monitoring and performance tracking for your web applications
                     </p>
+                    <AddWebsite onWebsiteAdded={fetchWebsites} />
                 </div>
 
                 {websites.length === 0 ? (
-                    <div className="text-center backdrop-blur-sm bg-black/40 rounded-2xl p-12 border border-gray-800/50">
-                        <div className="text-3xl font-semibold text-white mb-4">No websites yet</div>
-                        <p className="text-gray-400 mb-8">Start monitoring your websites by adding your first URL</p>
-                        <button className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold 
-                            hover:bg-green-700 transition-all duration-300">
-                            Add Website
-                        </button>
-                    </div>
+                    <NoWebsites />
                 ) : (
                     <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                         {websites.map((website) => (
