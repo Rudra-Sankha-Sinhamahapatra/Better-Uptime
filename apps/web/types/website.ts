@@ -9,3 +9,7 @@ export type Website = {
       createdAt: string;
     }
   }
+
+  export interface AddWebsiteProps {
+    onWebsiteAdded?: () => void;
+}
