@@ -9,6 +9,7 @@ BetterUptime is a robust website monitoring platform that helps you track the up
 - Beautiful dashboard interface
 - Distributed monitoring system using message queues
 - Scalable architecture ready for growth
+- Secure authentication with Google OAuth Using Better Auth
 
 ## Tech Stack
 
@@ -148,10 +149,6 @@ bun run build
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Future Improvements
-
-### Authentication & Authorization
-- Integration with BetterAuth for secure OAuth authentication
-
 
 ### Enhanced Notification System
 - Redis-based notification queue for improved scalability
