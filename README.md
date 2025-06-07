@@ -17,14 +17,14 @@ BetterUptime is a robust website monitoring platform that helps you track the up
 - **Worker**: TypeScript (with planned Go migration)
 - **Message Queue**: RabbitMQ (Queue 1 to send jobs to worker)
 - **Database**: PostgreSQL with Prisma
-- **Package Management**: pnpm with Turborepo
+- **Package Management**: bun with Turborepo
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18 or higher
-- pnpm
+- Node.js 22 or higher
+- bun
 - Bun runtime
 - RabbitMQ (or CloudAMQP account)
 - PostgreSQL database
@@ -33,8 +33,8 @@ BetterUptime is a robust website monitoring platform that helps you track the up
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/betteruptime.git
-cd betteruptime
+git clone https://github.com/Rudra-Sankha-Sinhamahapatra/Better-Uptime
+cd Better-Uptime
 ```
 
 2. Install dependencies:
