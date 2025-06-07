@@ -5,6 +5,22 @@ import type { WebsiteMonitoringMessage } from "../types/queue";
 
 export const allWebsites = async (req: Request, res: Response) => {
     try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          res.status(401).json({ error: "Unauthorized" });
+          return;
+      }
+
+      const token = authHeader.split(' ')[1];
+      const session = await prisma.session.findUnique({
+          where: { token },
+          include: { user: true }
+      });
+
+      if (!session) {
+          res.status(401).json({ error: "Invalid session" });
+          return;
+      }
       const websites = await prisma.website.findMany({
         include: {
           websiteTicks: {
@@ -13,6 +29,9 @@ export const allWebsites = async (req: Request, res: Response) => {
             },
             take: 1,
           }
+        },
+        where: {
+          userId: session.user.id
         }
       });
 
@@ -32,6 +51,22 @@ export const allWebsites = async (req: Request, res: Response) => {
 
   export const createWebsite = async (req: Request, res: Response) => {
     try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          res.status(401).json({ error: "Unauthorized" });
+          return;
+      }
+
+      const token = authHeader.split(' ')[1];
+      const session = await prisma.session.findUnique({
+          where: { token },
+          include: { user: true }
+      });
+
+      if (!session) {
+          res.status(401).json({ error: "Invalid session" });
+          return;
+      }
     const { name, url } = req.body; 
     if(!url || !name) {
     res.status(400).json({ error: "Name and url are required" });
@@ -43,6 +78,7 @@ export const allWebsites = async (req: Request, res: Response) => {
           name,
           url,
           timeAdded: new Date(),
+          userId: session.user.id
        },
     });
 

@@ -1,4 +1,6 @@
 import express from "express";
+import dotenv from "dotenv";
+dotenv.config();
 import cors from "cors";
 import { allWebsites, createWebsite, getWebsiteById } from "./controllers/website";
 import { connectToRabbitMQ } from "./services/rabbitmq";
@@ -6,10 +8,18 @@ import { config } from "./config";
 import { shutdown } from "./utils/shutdown";
 import { queueHealth } from "./controllers/queue";
 import { startScheduler } from "./services/scheduler";
+import cookieParser from 'cookie-parser';
+
 
 const app = express();
+app.use(cookieParser());
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-session', 'x-user-id', 'Cookie']
+}));
 
 app.get("/queue-health", queueHealth);
 
