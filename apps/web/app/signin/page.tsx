@@ -1,6 +1,6 @@
 import { GoogleSignIn } from "@/components/GoogleSignIn";
 import { Navbar } from "@/components/Navbar";
-import { WebsitesGradient } from "@/components/WebsitesGradient";
+import { WebsitesGradient } from "@/components/ui/WebsitesGradient";
 
 export default function Signin() {
   return (

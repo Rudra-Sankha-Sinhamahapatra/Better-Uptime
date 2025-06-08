@@ -1,5 +1,5 @@
 "use client"
-import { HeroGradient } from "./HeroGradient"
+import { HeroGradient } from "./ui/HeroGradient"
 import { useRouter } from "next/navigation"
 
 export const Hero = () => {

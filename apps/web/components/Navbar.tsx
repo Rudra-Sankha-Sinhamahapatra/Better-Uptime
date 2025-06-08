@@ -4,10 +4,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { UserProfile } from "./UserProfile"
 import { Session } from "@/types/session"
+import { NavbarGradient } from "./ui/NavbarGradient";
 
 export const Navbar = () => {
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm border-b border-white/10">
+           <NavbarGradient/>
             <div className="container mx-auto px-6 py-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-8">

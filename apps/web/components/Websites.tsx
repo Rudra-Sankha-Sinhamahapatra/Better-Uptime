@@ -3,7 +3,7 @@
 import { Website } from "@/types/website";
 import { config } from "@/utils/config";
 import { useEffect, useState } from "react"
-import { WebsitesGradient } from "./WebsitesGradient";
+import { WebsitesGradient } from "./ui/WebsitesGradient";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { authClient } from "@/lib/auth-client";
