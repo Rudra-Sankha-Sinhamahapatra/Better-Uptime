@@ -26,7 +26,6 @@ export function UserProfile({children}: UserProfileProps) {
                 setSession(response.data as Session);
             } else {
                 setSession(null);
-                router.push("/signin");
             }
         };
         

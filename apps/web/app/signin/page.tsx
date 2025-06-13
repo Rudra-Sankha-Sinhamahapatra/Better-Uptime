@@ -1,11 +1,9 @@
 import { GoogleSignIn } from "@/components/GoogleSignIn";
-import { Navbar } from "@/components/Navbar";
 import { WebsitesGradient } from "@/components/ui/WebsitesGradient";
 
 export default function Signin() {
   return (
     <div className="relative min-h-screen bg-black flex flex-col items-center justify-center px-4">
-        <Navbar />
         <WebsitesGradient />
 
         <div className="relative z-10 text-center max-w-md w-full backdrop-blur-sm bg-black/10 rounded-2xl p-12 border-gray-800/50">
