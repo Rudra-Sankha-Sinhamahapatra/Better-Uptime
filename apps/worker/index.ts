@@ -3,6 +3,7 @@ import { config } from "./config";
 import { checkWebsite } from "./monitoring";
 import prisma, { WebsiteStatus } from "@repo/db/client";
 import type { AmqpChannel, AmqpConnection } from "./types/amqp";
+import { sendEmail } from "./services/nodemailer";
 
 
 let connection: AmqpConnection | null = null;
@@ -58,7 +59,7 @@ const startWorker = async () => {
             const data = JSON.parse(message.content.toString());
             console.log("Processing message", {
                 websiteId: data.websiteId,
-                url: data.url
+                url: data.url,
             });
 
             const result = await checkWebsite(data.url);
@@ -76,10 +77,22 @@ const startWorker = async () => {
                     websiteId:data.websiteId
                 }
             });
+            const website = await prisma.website.findUnique({
+                where: { id: data.websiteId },
+                include: { user: true }
+            });    
+
+            if(!website) {
+                console.error("Website not found",data.websiteId);
+                channel.nack(message,false,false);
+                return;
+            }
 
             if(result.status === WebsiteStatus.Down) {
                 console.log(`Check completed for ${data.url} with status ${result.status}, response status: ${result.responseStatus}, result: `,result);
-                // Will send an email to the user
+                console.log("Sending email to, ",website.user.email);
+                // Website is Down , send an email to the user
+                await sendEmail(website.user.email,`Website ${data.url} is down`,`The website ${data.url} is down. Please check it.`);
             }
 
             console.log(`Check completed for ${data.url}:`, result);

@@ -10,4 +10,8 @@ export const config = {
    queueName: "website_monitoring",
    rabbitMqUrl: process.env.AMQP_URL,
   },
+  email: {
+    Emailuser: process.env.EMAIL_USER,
+    AppPass: process.env.EMAIL_PASSWORD,
+  }
 }
