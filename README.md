@@ -2,6 +2,10 @@
 
 BetterUptime is a robust website monitoring platform that helps you track the uptime and performance of your websites in real-time. Built with modern technologies and a distributed architecture, it provides reliable monitoring with instant notifications when your websites experience downtime.
 
+# Demo
+https://github.com/user-attachments/assets/b115c62a-99b5-4f0a-b3d3-3059a30492d8
+
+
 ## Features
 
 - Real-time website monitoring
@@ -98,6 +102,7 @@ The architecture consists of several key components working together:
    - Reports status and response times back to DB
    - Sends email notifications when websites go down
    - Handles email delivery through Gmail SMTP
+   - Redis-based notification queue for improved scalability
 
 4. **Message Queues**:
    - RabbitMQ for monitoring tasks
@@ -158,7 +163,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Future Improvements
 
 ### Enhanced Notification System
-- Redis-based notification queue for improved scalability
 - Multiple notification channels:
   - Enhanced email notifications:
     - Customizable email templates
