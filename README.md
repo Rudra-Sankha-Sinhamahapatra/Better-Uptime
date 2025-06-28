@@ -12,7 +12,10 @@ https://github.com/user-attachments/assets/b115c62a-99b5-4f0a-b3d3-3059a30492d8
 - Response time tracking
 - Beautiful dashboard interface
 - Distributed monitoring system using message queues
-- Email notifications for website downtime
+- Smart notification system:
+  - Email notifications for website downtime and recovery
+  - Redis-based email queue for reliable delivery
+  - Automatic retries for failed notifications
 - Scalable architecture ready for growth
 - Secure authentication with Google OAuth Using Better Auth
 
@@ -22,7 +25,9 @@ https://github.com/user-attachments/assets/b115c62a-99b5-4f0a-b3d3-3059a30492d8
 - **API Server**: Bun with TypeScript
 - **Google OAuth**: Better Auth
 - **Worker**: TypeScript (with planned Go migration)
-- **Message Queue**: RabbitMQ (Queue 1 to send jobs to worker)
+- **Message Queues**: 
+  - RabbitMQ for monitoring tasks
+  - Redis for email notifications
 - **Email Service**: Nodemailer with Gmail SMTP
 - **Database**: PostgreSQL with Prisma
 - **Package Management**: bun with Turborepo
@@ -35,6 +40,7 @@ https://github.com/user-attachments/assets/b115c62a-99b5-4f0a-b3d3-3059a30492d8
 - bun
 - Bun runtime
 - RabbitMQ (or CloudAMQP account)
+- Redis (for email queue)
 - PostgreSQL database
 - Gmail account for SMTP (with App Password)
 
@@ -62,9 +68,11 @@ RABBITMQ_URL=your_cloudamqp_url
 PORT=3001
 
 # In apps/worker/.env
-RABBITMQ_URL=your_cloudamqp_url
-EMAIL_USER=your_gmail_address
-EMAIL_PASSWORD=your_gmail_app_password
+DATABASE_URL=""
+AMQP_URL="" # RabbitMQ URL
+EMAIL_USER="" # Gmail address
+EMAIL_PASSWORD="" # Gmail App password for nodemailer
+REDIS_URL="redis://localhost:6379" # Redis URL for email queue
 ```
 
 4. Start the development servers:
@@ -75,7 +83,7 @@ bun dev
 This will start:
 - Web interface on http://localhost:3000
 - API server on http://localhost:3001
-- Worker service for processing monitoring tasks and sending email notifications
+- Worker service for processing monitoring tasks and managing email notifications
 
 ## Architecture
 
@@ -95,32 +103,42 @@ The architecture consists of several key components working together:
    - Stores website information
    - Records monitoring history and website ticks
    - Maintains response times and status data
+   - Stores user information for notifications
 
 3. **Worker**:
    - Consumes monitoring tasks from RabbitMQ
    - Performs actual website status checks
    - Reports status and response times back to DB
-   - Sends email notifications when websites go down
-   - Handles email delivery through Gmail SMTP
-   - Redis-based notification queue for improved scalability
+   - Manages email notifications through Redis queue:
+     - Queues downtime notifications
+     - Queues recovery notifications
+     - Handles automatic retries
+     - Provides reliable email delivery
 
 4. **Message Queues**:
    - RabbitMQ for monitoring tasks
-   - Email alerts
+   - Redis for reliable email notification delivery:
+     - Priority-based email queuing
+     - Automatic retries with exponential backoff
+     - Failed notification tracking
 
 5. **Monitored Websites**:
    - External websites being monitored
    - Status checks performed every 5 minutes
    - Response times recorded for performance tracking
-   - Email alerts sent on downtime detection
+   - Smart notification system:
+     - Downtime alerts
+     - Recovery notifications
+     - Automatic retry on delivery failure
 
 Key components:
 1. **Web Interface**: React-based dashboard for managing monitored websites and viewing their status
 2. **API Server**: Handles website management and publishes monitoring tasks with user email info
 3. **RabbitMQ**: Message queue for distributing monitoring tasks
-4. **Worker Service**: Consumes monitoring tasks, performs website checks, and sends notifications
-5. **PostgreSQL**: Stores website data, monitoring history, and user information
-6. **Email Service**: Handles downtime notifications via Gmail SMTP
+4. **Redis**: Handles reliable email notification delivery with retries
+5. **Worker Service**: Consumes monitoring tasks, performs website checks, and manages notifications
+6. **PostgreSQL**: Stores website data, monitoring history, and user information
+7. **Email Service**: Processes queued notifications via Gmail SMTP
 
 ## Development
 
@@ -129,7 +147,7 @@ Key components:
 apps/
   ├── web/          # Next.js frontend
   ├── api/          # Bun/TypeScript API server
-  └── worker/       # TypeScript monitoring worker with email notifications
+  └── worker/       # TypeScript monitoring worker with Redis-based notifications
 packages/
   ├── db/           # Prisma schema and client
   ├── ui/           # Shared UI components
@@ -165,26 +183,28 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### Enhanced Notification System
 - Multiple notification channels:
   - Enhanced email notifications:
-    - Customizable email templates
-    - Website recovery (up) notifications
-    - HTML email support with branding
-    - Notification batching for multiple events
-    - Future Redis Queue for enhanced notifications:
-     - Email notifications with templates
-     - WhatsApp alerts
-
-  - WhatsApp integration for instant alerts
-  - SMS/Voice call alerts for critical outages
-  - Webhook support for custom integrations
-- Notification rate limiting and batching
-- Custom notification rules and schedules
-- Notification preferences per user/website
+    - HTML email templates with rich formatting
+    - Customizable notification templates
+    - Batch notifications for multiple events
+    - Weekly/monthly status reports
+  - Additional channels:
+    - WhatsApp integration
+    - SMS alerts
+    - Voice calls for critical outages
+    - Webhook support
+- Advanced notification features:
+  - Rate limiting and throttling
+  - Custom notification rules
+  - Per-user notification preferences
+  - Scheduled maintenance windows
+  - Custom alert thresholds
+  - Notification history and analytics
 
 ### Monitoring Enhancements
-- Time Series DB 
-- Monitoring History
-- Advanced email reporting:
-  - Weekly/monthly uptime reports
-  - Performance trend analysis
-  - Custom alert thresholds
-  - Scheduled maintenance windows
+- Time Series DB for metrics
+- Extended monitoring history
+- Performance analytics:
+  - Trend analysis
+  - Uptime statistics
+  - Response time graphs
+  - Geographic monitoring distribution

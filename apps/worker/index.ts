@@ -3,7 +3,7 @@ import { config } from "./config";
 import { checkWebsite } from "./monitoring";
 import prisma, { WebsiteStatus } from "@repo/db/client";
 import type { AmqpChannel, AmqpConnection } from "./types/amqp";
-import { sendEmail } from "./services/nodemailer";
+import { closeEmailQueue, queueDowntimeEmail, queueUptimeEmail } from "./services/emailQueue";
 
 
 let connection: AmqpConnection | null = null;
@@ -22,6 +22,8 @@ const closeWorker = async () => {
             await connection.close();
             console.log("Connection closed");
         }
+
+        await closeEmailQueue();
     } catch (error) {
         console.log("Error closing worker connections:", error);
     } finally {
@@ -88,11 +90,27 @@ const startWorker = async () => {
                 return;
             }
 
+            const previousTick = await prisma.websiteTick.findFirst({
+                where: {
+                    websiteId: data.websiteId,
+                    id: { not: tick.id }
+                },
+                orderBy: { createdAt: 'desc' }
+            });
+
             if(result.status === WebsiteStatus.Down) {
+                if(previousTick?.status === WebsiteStatus.Up) {
                 console.log(`Check completed for ${data.url} with status ${result.status}, response status: ${result.responseStatus}, result: `,result);
                 console.log("Sending email to, ",website.user.email);
                 // Website is Down , send an email to the user
-                await sendEmail(website.user.email,`Website ${data.url} is down`,`The website ${data.url} is down. Please check it.`);
+                await queueDowntimeEmail(website.user.email, data.url);
+                }
+            } else if(result.status === WebsiteStatus.Up) {
+                if(previousTick?.status === WebsiteStatus.Down) {
+                    console.log(`Check completed for ${data.url} with status ${result.status}, response status: ${result.responseStatus}, result: `,result);
+                    console.log("Sending email to, ",website.user.email);
+                    await queueUptimeEmail(website.user.email, data.url);
+                }
             }
 
             console.log(`Check completed for ${data.url}:`, result);
@@ -109,6 +127,25 @@ const startWorker = async () => {
         console.log("Graceful shutdown complete");
         process.exit(0);
       })
+
+      process.on("SIGTERM", async () => {
+        console.log("\nReceived SIGTERM. Starting graceful shutdown...");
+        await closeWorker();
+        console.log("Graceful shutdown complete");
+        process.exit(0);
+    });
+    
+    process.on("uncaughtException", async (error) => {
+        console.error("Uncaught Exception:", error);
+        await closeWorker();
+        process.exit(1);
+    });
+    
+    process.on("unhandledRejection", async (reason, promise) => {
+        console.error("Unhandled Rejection at:", promise, "reason:", reason);
+        await closeWorker();
+        process.exit(1);
+    });
     } catch(error :any) {
         console.error("Failed to start worker",error);
         process.exit(1);

@@ -13,5 +13,8 @@ export const config = {
   email: {
     Emailuser: process.env.EMAIL_USER,
     AppPass: process.env.EMAIL_PASSWORD,
+  },
+  redis: {
+    redisURL: process.env.REDIS_URL || "redis://localhost:6379"
   }
 }
