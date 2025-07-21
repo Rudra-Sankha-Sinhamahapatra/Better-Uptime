@@ -34,6 +34,9 @@ export const Navbar = () => {
                             <Link href="/contact" className="text-gray-300 hover:text-white transition-colors">
                                 Contact
                             </Link>
+                            <Link href="/disclaimer" className="text-amber-300 hover:text-amber-400 transition-colors">
+                                Important Notice
+                            </Link>
                         </div>
                     </div>
 
