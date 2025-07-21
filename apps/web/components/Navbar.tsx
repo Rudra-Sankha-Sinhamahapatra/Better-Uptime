@@ -5,14 +5,22 @@ import Link from "next/link"
 import { UserProfile } from "./UserProfile"
 import { Session } from "@/types/session"
 import { NavbarGradient } from "./ui/NavbarGradient";
+import { useState } from "react";
 
 export const Navbar = () => {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const toggleMobileMenu = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
+    };
+
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm border-b border-white/10">
            <NavbarGradient/>
-            <div className="container mx-auto px-6 py-4">
+            <div className="container mx-auto px-4 sm:px-6 py-4 relative">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-8">
+                    {/* Logo */}
+                    <div className="flex items-center">
                         <Link href="/" className="flex items-center gap-2">
                             <Image 
                                 src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/4/supabase-icon-kpjasdqlnu8exakst6f44r.png/supabase-icon-5uqgeeqeknngv9las8zeef.png?_a=DAJFJtWIZAAC" 
@@ -23,24 +31,26 @@ export const Navbar = () => {
                             />
                             <span className="text-white font-semibold text-lg">BetterUptime</span>
                         </Link>
+                    </div>
                         
-                        <div className="flex items-center gap-6">
-                            <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors">
-                                Pricing
-                            </Link>
-                            <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
-                                About
-                            </Link>
-                            <Link href="/contact" className="text-gray-300 hover:text-white transition-colors">
-                                Contact
-                            </Link>
-                            <Link href="/disclaimer" className="text-amber-300 hover:text-amber-400 transition-colors">
-                                Important Notice
-                            </Link>
-                        </div>
+                    {/* Medium+ Navigation - Show ALL content on medium and large screens */}
+                    <div className="hidden sm:flex items-center gap-2 md:gap-12 lg:gap-14">
+                        <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors">
+                            Pricing
+                        </Link>
+                        <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
+                            About
+                        </Link>
+                        <Link href="/contact" className="text-gray-300 hover:text-white transition-colors">
+                            Contact
+                        </Link>
+                        <Link href="/disclaimer" className="text-amber-300 hover:text-amber-400 transition-colors text-xs sm:text-sm lg:text-base">
+                            Notice
+                        </Link>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    {/* Auth - Show on medium+ screens (sm and above) */}
+                    <div className="hidden sm:flex items-center gap-4">
                         <UserProfile> 
                             {(session: Session | null) => !session && (
                                 <>
@@ -61,6 +71,77 @@ export const Navbar = () => {
                         </UserProfile>
                     </div>
                 </div>
+
+                {/* Mobile Profile - Only for very small screens */}
+                <div className="sm:hidden absolute top-1/2 right-16 transform -translate-y-1/2 z-[9998]">
+                    <UserProfile> 
+                        {(session: Session | null) => !session && (
+                            <Link 
+                                href="/signin" 
+                                className="text-gray-300 hover:text-white transition-colors text-sm bg-gray-800/50 px-3 py-1 rounded-md"
+                            >
+                                Sign In
+                            </Link>
+                        )}
+                    </UserProfile>
+                </div>
+
+                {/* Mobile Menu Button - Only for very small screens */}
+                <button
+                    className="sm:hidden absolute top-1/2 right-4 transform -translate-y-1/2 text-white p-2 z-[9999] bg-black/50 rounded-md hover:bg-black/70 transition-colors"
+                    onClick={toggleMobileMenu}
+                    aria-label="Toggle menu"
+                >
+                    <svg 
+                        className="w-5 h-5" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                    >
+                        {isMobileMenuOpen ? (
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        ) : (
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        )}
+                    </svg>
+                </button>
+
+                {/* Mobile Sidebar - Only for very small screens */}
+                {isMobileMenuOpen && (
+                    <div className="sm:hidden mt-4 pb-4 border-t border-white/10 relative z-[9997]">
+                        <div className="flex flex-col space-y-4 pt-4">
+                            {/* Navigation links only - profile is completely separate */}
+                            <Link 
+                                href="/pricing" 
+                                className="text-gray-300 hover:text-white transition-colors py-2"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Pricing
+                            </Link>
+                            <Link 
+                                href="/about" 
+                                className="text-gray-300 hover:text-white transition-colors py-2"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                About
+                            </Link>
+                            <Link 
+                                href="/contact" 
+                                className="text-gray-300 hover:text-white transition-colors py-2"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Contact
+                            </Link>
+                            <Link 
+                                href="/disclaimer" 
+                                className="text-amber-300 hover:text-amber-400 transition-colors py-2"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Important Notice
+                            </Link>
+                        </div>
+                    </div>
+                )}
             </div>
         </nav>
     )
