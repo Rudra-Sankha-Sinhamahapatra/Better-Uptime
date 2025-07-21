@@ -49,33 +49,33 @@ export const Navbar = () => {
                         </Link>
                     </div>
 
-                    {/* Auth - Show on medium+ screens (sm and above) */}
-                    <div className="hidden sm:flex items-center gap-4">
-                        <UserProfile> 
-                            {(session: Session | null) => !session && (
-                                <>
-                                    <Link 
-                                        href="/signin" 
-                                        className="text-gray-300 hover:text-white transition-colors"
-                                    >
-                                        Log in
-                                    </Link>
-                                    <Link 
-                                        href="/signin" 
-                                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-                                    >
-                                        Get Started
-                                    </Link>
-                                </>
-                            )}
-                        </UserProfile>
-                    </div>
-                                    </div>
+                                        {/* Right side - Auth for medium+, Profile+Menu for mobile */}
+                    <div className="flex items-center gap-4">
+                        {/* Auth - Show on medium+ screens (sm and above) */}
+                        <div className="hidden sm:flex items-center gap-4">
+                            <UserProfile> 
+                                {(session: Session | null) => !session && (
+                                    <>
+                                        <Link 
+                                            href="/signin" 
+                                            className="text-gray-300 hover:text-white transition-colors"
+                                        >
+                                            Log in
+                                        </Link>
+                                        <Link 
+                                            href="/signin" 
+                                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                                        >
+                                            Get Started
+                                        </Link>
+                                    </>
+                                )}
+                            </UserProfile>
+                        </div>
 
-                                        {/* Mobile Profile and Menu - Clean side-by-side layout */}
-                    <div className="sm:hidden flex items-center gap-4">
-                        {/* Mobile Profile */}
-                        <div className="flex-shrink-0">
+                        {/* Mobile Profile and Menu - On same line as logo */}
+                        <div className="sm:hidden flex items-center gap-3">
+                            {/* Mobile Profile */}
                             <UserProfile> 
                                 {(session: Session | null) => !session && (
                                     <Link 
@@ -86,10 +86,8 @@ export const Navbar = () => {
                                     </Link>
                                 )}
                             </UserProfile>
-                        </div>
 
-                        {/* Mobile Menu Button - Right next to profile */}
-                        <div className="flex-shrink-0">
+                            {/* Mobile Menu Button - Right next to profile */}
                             <button
                                 className="text-white p-2 bg-black/50 rounded-md hover:bg-black/70 transition-colors border border-gray-700/50"
                                 onClick={toggleMobileMenu}
@@ -110,6 +108,7 @@ export const Navbar = () => {
                             </button>
                         </div>
                     </div>
+                </div>
 
                 {/* Mobile Sidebar - Only for very small screens */}
                 {isMobileMenuOpen && (
