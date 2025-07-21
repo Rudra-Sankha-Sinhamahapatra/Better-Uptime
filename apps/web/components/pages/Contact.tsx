@@ -1,5 +1,6 @@
 "use client"
 import { HeroGradient } from "@/components/ui/HeroGradient";
+import { Zap, Lightbulb, Mail, Clock, Globe } from "lucide-react";
 
 export default function ContactPage() {
   return (
@@ -67,7 +68,10 @@ export default function ContactPage() {
           <div className="space-y-6">
             {/* Direct Contact */}
             <div className="bg-gradient-to-br from-green-500/20 via-transparent to-green-500/10 rounded-2xl p-6 border border-gray-800/50 backdrop-blur-sm relative">
-              <h3 className="text-xl font-semibold mb-4 text-green-400">📧 Direct Contact</h3>
+              <h3 className="text-xl font-semibold mb-4 text-green-400 flex items-center gap-3">
+                <Mail className="w-5 h-5 text-white" />
+                Direct Contact
+              </h3>
               <div className="space-y-3 text-left">
                 <div>
                   <p className="text-gray-400">General Inquiries:</p>
@@ -86,7 +90,10 @@ export default function ContactPage() {
 
             {/* Support Hours */}
             <div className="bg-gradient-to-br from-green-500/20 via-transparent to-green-500/10 rounded-2xl p-6 border border-gray-800/50 backdrop-blur-sm relative">
-              <h3 className="text-xl font-semibold mb-4 text-green-400">🕒 Support Hours</h3>
+              <h3 className="text-xl font-semibold mb-4 text-green-400 flex items-center gap-3">
+                <Clock className="w-5 h-5 text-white" />
+                Support Hours
+              </h3>
               <div className="space-y-2 text-left">
                 <div className="flex justify-between">
                   <span className="text-gray-400">Monday - Friday:</span>
@@ -108,7 +115,10 @@ export default function ContactPage() {
 
             {/* Quick Support */}
             <div className="bg-gradient-to-br from-green-500/20 via-transparent to-green-500/10 rounded-2xl p-6 border border-gray-800/50 backdrop-blur-sm relative">
-              <h3 className="text-xl font-semibold mb-4 text-green-400">⚡ Quick Support</h3>
+              <h3 className="text-xl font-semibold mb-4 text-green-400 flex items-center gap-3">
+              <Zap className="w-5 h-5 text-white" />
+              Quick Support
+            </h3>
               <div className="space-y-3 text-left">
                 <div>
                   <p className="text-gray-400 mb-2">Need immediate help?</p>
@@ -127,7 +137,10 @@ export default function ContactPage() {
 
             {/* Social Media */}
             <div className="bg-gradient-to-br from-green-500/20 via-transparent to-green-500/10 rounded-2xl p-6 border border-gray-800/50 backdrop-blur-sm relative">
-              <h3 className="text-xl font-semibold mb-4 text-green-400">🌐 Follow Us</h3>
+              <h3 className="text-xl font-semibold mb-4 text-green-400 flex items-center gap-3">
+                <Globe className="w-5 h-5 text-white" />
+                Follow Us
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 <a 
                   href="https://x.com/RudraSankha"
@@ -180,7 +193,10 @@ export default function ContactPage() {
 
         {/* FAQ Link */}
         <div className="mt-12 bg-gradient-to-br from-green-500/20 via-transparent to-green-500/10 rounded-2xl p-6 border border-gray-800/50 backdrop-blur-sm relative">
-          <h3 className="text-xl font-semibold mb-3 text-green-400">💡 Frequently Asked Questions</h3>
+                      <h3 className="text-xl font-semibold mb-3 text-green-400 flex items-center gap-3">
+              <Lightbulb className="w-5 h-5 text-white" />
+              Frequently Asked Questions
+            </h3>
           <p className="text-gray-400 mb-4">
             Before reaching out, you might find your answer in our comprehensive FAQ section.
           </p>

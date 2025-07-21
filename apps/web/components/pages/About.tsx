@@ -1,5 +1,6 @@
 "use client"
 import { HeroGradient } from "@/components/ui/HeroGradient";
+import { Rocket, Lightbulb, Settings, Star, Target } from "lucide-react";
 
 export default function AboutPage() {
   return (
@@ -16,7 +17,10 @@ export default function AboutPage() {
         <div className="bg-gradient-to-br from-green-500/20 via-transparent to-green-500/10 rounded-2xl p-8 mb-8 border border-gray-800/50">
           <div className="text-left space-y-6 text-gray-300 leading-relaxed">
             <div>
-              <h2 className="text-2xl font-semibold mb-4 text-green-400">🚀 Our Mission</h2>
+              <h2 className="text-2xl font-semibold mb-4 text-green-400 flex items-center gap-3">
+                <Rocket className="w-6 h-6 text-white" />
+                Our Mission
+              </h2>
               <p className="text-lg text-white">
                 At BetterUptime, we believe every business deserves reliable website monitoring that's both powerful and affordable. 
                 We're dedicated to providing real-time insights into your website's performance, helping you maintain exceptional uptime 
@@ -25,7 +29,10 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold mb-4 text-green-400">💡 Why We Built This</h2>
+              <h2 className="text-2xl font-semibold mb-4 text-green-400 flex items-center gap-3">
+                <Lightbulb className="w-6 h-6 text-white" />
+                Why We Built This
+              </h2>
               <p className="mb-4 text-white">
                 Website downtime can cost businesses thousands of dollars and damage customer trust. Traditional monitoring solutions 
                 are often expensive, complex, or lack the features you actually need. We created BetterUptime to solve these problems:
@@ -40,7 +47,10 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold mb-4 text-green-400">🔧 How It Works</h2>
+              <h2 className="text-2xl font-semibold mb-4 text-green-400 flex items-center gap-3">
+                <Settings className="w-6 h-6 text-white" />
+                How It Works
+              </h2>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="bg-black/40 border border-gray-800/50 rounded-lg p-4">
                   <h3 className="font-semibold text-white mb-2">1. Monitor</h3>
@@ -58,7 +68,10 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold mb-4 text-green-400">🌟 Key Features</h2>
+              <h2 className="text-2xl font-semibold mb-4 text-green-400 flex items-center gap-3">
+                <Star className="w-6 h-6 text-white" />
+                Key Features
+              </h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <ul className="space-y-2">
                   <li className="flex items-center gap-2">
@@ -100,7 +113,10 @@ export default function AboutPage() {
             </div>
 
             <div className="bg-black/40 border border-gray-800/50 rounded-lg p-6">
-              <h2 className="text-2xl font-semibold mb-4 text-green-400">🎯 Our Commitment</h2>
+              <h2 className="text-2xl font-semibold mb-4 text-green-400 flex items-center gap-3">
+                <Target className="w-6 h-6 text-white" />
+                Our Commitment
+              </h2>
               <p className="text-white">
                 We're committed to providing reliable, accurate monitoring that you can trust. Our team continuously works to improve 
                 our service, add new features, and ensure your websites are monitored with the highest precision possible.

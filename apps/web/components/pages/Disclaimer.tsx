@@ -1,6 +1,7 @@
 "use client"
 
 import { HeroGradient } from "@/components/ui/HeroGradient";
+import { CheckCircle, Lightbulb, AlertTriangle, Ban, Search, Clipboard } from "lucide-react";
 
 export default function DisclaimerPage() {
   return (
@@ -14,13 +15,17 @@ export default function DisclaimerPage() {
         </h1>
         
         <div className="bg-black/40 backdrop-blur-sm border border-green-500/20 rounded-xl p-8 mb-8">
-          <h2 className="text-2xl font-semibold mb-6 text-green-400">
-            ⚠️ DDoS Protection & Monitoring Compatibility
+          <h2 className="text-2xl font-semibold mb-6 text-green-400 flex items-center justify-center gap-3">
+            <AlertTriangle className="w-6 h-6 text-yellow-300" />
+            DDoS Protection & Monitoring Compatibility
           </h2>
           
           <div className="text-left space-y-6 text-gray-300 leading-relaxed">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">🚫 Please Disable DDoS Protection Services</h3>
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-3">
+                <Ban className="w-5 h-5 text-red-500" />
+                Please Disable DDoS Protection Services
+              </h3>
               <p className="mb-3">
                 To ensure accurate website monitoring, please <strong className="text-green-400">disable any DDoS protection services</strong> on your websites, including but not limited to:
               </p>
@@ -34,7 +39,10 @@ export default function DisclaimerPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">🔍 Why This Matters</h3>
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-3">
+                <Search className="w-5 h-5 text-green-500" />
+                Why This Matters
+              </h3>
               <p className="mb-3">
                 Our monitoring system works by sending regular HTTP requests to your website to check its availability and response time. 
                 DDoS protection services often block or rate-limit these automated requests, which can result in:
@@ -48,7 +56,10 @@ export default function DisclaimerPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">✅ Recommended Actions</h3>
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                Recommended Actions
+              </h3>
               <div className="space-y-3">
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
                   <p className="font-semibold text-green-400 mb-2">For Vercel Users:</p>
@@ -68,7 +79,10 @@ export default function DisclaimerPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">📋 Before Adding Your Website</h3>
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-3">
+                <Clipboard className="w-5 h-5 text-blue-400" />
+                Before Adding Your Website
+              </h3>
               <p className="mb-3">
                 Please ensure that:
               </p>
@@ -82,7 +96,10 @@ export default function DisclaimerPage() {
             </div>
 
             <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-amber-400 mb-3">💡 Need Help?</h3>
+              <h3 className="text-lg font-semibold text-amber-400 mb-3 flex items-center gap-3">
+                <Lightbulb className="w-5 h-5 text-white" />
+                Need Help?
+              </h3>
               <p>
                 If you're unsure about your current DDoS protection settings or need assistance configuring your website for monitoring, 
                 please contact our support team. We're here to help ensure accurate monitoring of your websites.
