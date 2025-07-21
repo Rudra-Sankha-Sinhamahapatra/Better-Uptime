@@ -28,7 +28,7 @@ export const Footer = () => {
                         <h3 className="text-xl font-semibold text-white">Connect With Us</h3>
                         <div className="flex gap-4">
                             <motion.a
-                                href="https://github.com"
+                                href="https://github.com/Rudra-Sankha-Sinhamahapatra/Better-Uptime"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 rounded-lg bg-black/60 border border-gray-800/50 hover:border-green-500/50 text-gray-400 hover:text-green-400 transition-all duration-300"
@@ -37,7 +37,7 @@ export const Footer = () => {
                                 <Github className="w-5 h-5" />
                             </motion.a>
                             <motion.a
-                                href="https://twitter.com"
+                                href="https://x.com/RudraSankha"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 rounded-lg bg-black/60 border border-gray-800/50 hover:border-green-500/50 text-gray-400 hover:text-green-400 transition-all duration-300"
@@ -46,7 +46,7 @@ export const Footer = () => {
                                 <Twitter className="w-5 h-5" />
                             </motion.a>
                             <motion.a
-                                href="https://linkedin.com"
+                                href="https://www.linkedin.com/in/rudra-sankha-sinhamahapatra-6311aa1bb/"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 rounded-lg bg-black/60 border border-gray-800/50 hover:border-green-500/50 text-gray-400 hover:text-green-400 transition-all duration-300"
