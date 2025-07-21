@@ -34,7 +34,7 @@ export const Navbar = () => {
                     </div>
                         
                     {/* Medium+ Navigation - Show ALL content on medium and large screens */}
-                    <div className="hidden sm:flex items-center gap-2 md:gap-12 lg:gap-14">
+                    <div className="hidden sm:flex items-center gap-2 sm:gap-4 md:gap-4 lg:gap-6">
                         <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors">
                             Pricing
                         </Link>
@@ -70,41 +70,46 @@ export const Navbar = () => {
                             )}
                         </UserProfile>
                     </div>
-                </div>
+                                    </div>
 
-                {/* Mobile Profile - Only for very small screens */}
-                <div className="sm:hidden absolute top-1/2 right-16 transform -translate-y-1/2 z-[9998]">
-                    <UserProfile> 
-                        {(session: Session | null) => !session && (
-                            <Link 
-                                href="/signin" 
-                                className="text-gray-300 hover:text-white transition-colors text-sm bg-gray-800/50 px-3 py-1 rounded-md"
+                                        {/* Mobile Profile and Menu - Clean side-by-side layout */}
+                    <div className="sm:hidden flex items-center gap-4">
+                        {/* Mobile Profile */}
+                        <div className="flex-shrink-0">
+                            <UserProfile> 
+                                {(session: Session | null) => !session && (
+                                    <Link 
+                                        href="/signin" 
+                                        className="text-gray-300 hover:text-white transition-colors text-sm bg-gray-800/50 px-3 py-1.5 rounded-md border border-gray-700/50"
+                                    >
+                                        Sign In
+                                    </Link>
+                                )}
+                            </UserProfile>
+                        </div>
+
+                        {/* Mobile Menu Button - Right next to profile */}
+                        <div className="flex-shrink-0">
+                            <button
+                                className="text-white p-2 bg-black/50 rounded-md hover:bg-black/70 transition-colors border border-gray-700/50"
+                                onClick={toggleMobileMenu}
+                                aria-label="Toggle menu"
                             >
-                                Sign In
-                            </Link>
-                        )}
-                    </UserProfile>
-                </div>
-
-                {/* Mobile Menu Button - Only for very small screens */}
-                <button
-                    className="sm:hidden absolute top-1/2 right-4 transform -translate-y-1/2 text-white p-2 z-[9999] bg-black/50 rounded-md hover:bg-black/70 transition-colors"
-                    onClick={toggleMobileMenu}
-                    aria-label="Toggle menu"
-                >
-                    <svg 
-                        className="w-5 h-5" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                    >
-                        {isMobileMenuOpen ? (
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        ) : (
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        )}
-                    </svg>
-                </button>
+                                <svg 
+                                    className="w-5 h-5" 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                >
+                                    {isMobileMenuOpen ? (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    ) : (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                    )}
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
 
                 {/* Mobile Sidebar - Only for very small screens */}
                 {isMobileMenuOpen && (
