@@ -7,6 +7,7 @@ import { connectToRabbitMQ } from "./services/rabbitmq";
 import { config } from "./config";
 import { shutdown } from "./utils/shutdown";
 import { queueHealth } from "./controllers/queue";
+import { submitContactForm } from "./controllers/contact";
 import { startScheduler } from "./services/scheduler";
 import cookieParser from 'cookie-parser';
 
@@ -28,6 +29,8 @@ app.get("/website", allWebsites);
 app.post("/website", createWebsite);
 
 app.get("/website/:websiteId", getWebsiteById);
+
+app.post("/contact", submitContactForm);
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);

@@ -1,7 +1,7 @@
 import amqp from "amqplib";
 import { config } from "../config";
 import type { AmqpChannel, AmqpConnection } from "../types/amqp";
-import type { WebsiteMonitoringMessage } from "../types/queue";
+import type { WebsiteMonitoringMessage, QueueMessage } from "../types/queue";
 
 
 let connection: AmqpConnection | null = null;
@@ -70,7 +70,7 @@ export const closeQueue = async () => {
     }
 }
 
-export const publishToQueue = async (message: WebsiteMonitoringMessage) => {
+export const publishToQueue = async (message: QueueMessage) => {
     try {
         if (!channel) {
             await connectToRabbitMQ();
@@ -90,12 +90,13 @@ export const publishToQueue = async (message: WebsiteMonitoringMessage) => {
                 contentType: 'application/json',
                 expiration: '86400000', //24 hrs 
                 timestamp: Date.now(),
-                messageId: message.websiteId
+                messageId: 'type' in message ? `contact-${Date.now()}` : message.websiteId
             }
         )
 
         if(success) {
-            console.log("Message published to queue for website: ", message.url);
+            const messageType = 'type' in message ? message.type : 'website_monitoring';
+            console.log("Message published to queue:", messageType);
         } 
         
       return success;
