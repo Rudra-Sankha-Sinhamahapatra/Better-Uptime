@@ -1,15 +1,17 @@
 import Queue  from "bull";
 import { config } from "../config";
 import { sendEmail } from "./nodemailer";
+import type { ContactFormEmailData } from "../types/contact";
 
 interface EmailJob {
     to: string;
     subject: string;
     text: string;
-    websiteUrl: string;
-    status: 'down' | 'up'
+    websiteUrl?: string;
+    status: 'down' | 'up' | 'contact'
     retries?: number
 }
+
 
 const emailQueue = new Queue<EmailJob>('email-notifications',config.redis.redisURL, {
     defaultJobOptions: {
@@ -42,9 +44,9 @@ emailQueue.on('failed', (job,error) => {
 export const queueEmail = async (emailData: EmailJob) => {
     try {
         const job = await emailQueue.add(emailData, {
-            priority: emailData.status === 'down' ? 1 : 2
+            priority: emailData.status === 'down' ? 1 : emailData.status === 'contact' ? 2 : 3
         })
-        console.log(`Email job ${job.id} added to queue for ${emailData.websiteUrl}`);
+        console.log(`Email job ${job.id} added to queue`);
         return job;
     } catch (error) {
         console.error('Failed to add email to queue:', error);
@@ -72,6 +74,50 @@ export const queueUptimeEmail = async (to: string, websiteUrl: string) => {
     });
 };
 
+export const queueContactFormEmail = async (contactData: ContactFormEmailData) => {
+    const ownerEmail = config.email.Emailuser;
+    
+    if (!ownerEmail) {
+        throw new Error("Owner email not configured");
+    }
+    
+    const userInfo = contactData.isLoggedIn 
+        ? `\n👤 Submitted Form Data:
+- Name: ${contactData.name}
+- Email: ${contactData.email}
+
+🔐 Original Account Details:
+- User ID: ${contactData.userId}
+- Account Name: ${contactData.originalName || 'Not available'}
+- Account Email: ${contactData.originalEmail || 'Not available'}
+- Account Status: Logged in user`
+        : `\n👤 User Info:
+- Name: ${contactData.name}
+- Email: ${contactData.email}
+- Account Status: Anonymous user`;
+
+    const emailContent = `
+🎯 New Contact Form Submission
+
+📝 Query Type: ${contactData.queryType}
+
+💬 Message:
+${contactData.query}
+${userInfo}
+
+📅 Submitted: ${new Date(contactData.submittedAt).toLocaleString()}
+
+---
+Please respond to: ${contactData.email}
+`.trim();
+
+    return queueEmail({
+        to: ownerEmail,
+        subject: `📨 New Contact Form: ${contactData.queryType} - ${contactData.name}`,
+        text: emailContent,
+        status: 'contact'
+    });
+};
 
 export const closeEmailQueue = async () => {
     try {

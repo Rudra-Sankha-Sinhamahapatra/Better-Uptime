@@ -1,8 +1,100 @@
 "use client"
 import { HeroGradient } from "@/components/ui/HeroGradient";
 import { Zap, Lightbulb, Mail, Clock, Globe } from "lucide-react";
+import { useState, useEffect } from "react";
+import { authClient } from "@/lib/auth-client";
+import { config } from "@/utils/config";
+
+type SessionUser = {
+  id: string;
+  name: string | null;
+  email: string;
+  image?: string | null;
+  emailVerified?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    queryType: "General Inquiry",
+    query: ""
+  });
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [user, setUser] = useState<SessionUser | null>(null);
+
+  useEffect(() => {
+    // Check if user is logged in and prefill form
+    const checkUser = async () => {
+      try {
+        const session = await authClient.getSession();
+        if (session.data?.session) {
+          setUser(session.data.user);
+          setFormData(prev => ({
+            ...prev,
+            name: session.data.user.name || "",
+            email: session.data.user.email || ""
+          }));
+        }
+      } catch (error) {
+        console.log("User not logged in");
+      }
+    };
+    checkUser();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const session = await authClient.getSession();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      if (session.data?.session) {
+        headers["Authorization"] = `Bearer ${session.data.session.token}`;
+      }
+
+      const response = await fetch(`${config.backendUrl}/contact`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit contact form");
+      }
+
+      setSubmitted(true);
+      setFormData({
+        name: user?.name || "",
+        email: user?.email || "",
+        queryType: "General Inquiry",
+        query: ""
+      });
+    } catch (error: any) {
+      console.error("Error submitting contact form:", error);
+      setError(error.message || "Failed to submit contact form");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen bg-black px-4 py-24">
       <HeroGradient />
@@ -20,26 +112,67 @@ export default function ContactPage() {
           {/* Contact Form - Matching AddWebsite styling */}
           <div className="bg-gradient-to-br from-green-500/20 via-transparent to-green-500/10 rounded-2xl p-8 border border-gray-800/50 backdrop-blur-sm relative">
             <h2 className="text-2xl font-semibold mb-6 text-white">Send us a Message</h2>
-            <form className="space-y-6">
+            
+            {user && (
+              <div className="mb-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                <p className="text-sm text-green-400">
+                  ✅ Logged in as {user.name || user.email}
+                </p>
+              </div>
+            )}
+
+            {submitted && (
+              <div className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg">
+                <p className="text-green-400 font-medium">
+                  ✅ Thank you! Your message has been sent successfully.
+                </p>
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
+                <p className="text-red-400 font-medium">
+                  ❌ {error}
+                </p>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-gray-400 mb-2">Name</label>
                 <input 
                   type="text" 
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   className="w-full bg-black/60 border border-gray-800/50 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-500/50"
                   placeholder="Your name"
+                  required
+                  disabled={loading}
                 />
               </div>
               <div>
                 <label className="block text-gray-400 mb-2">Email</label>
                 <input 
                   type="email" 
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full bg-black/60 border border-gray-800/50 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-500/50"
                   placeholder="your@email.com"
+                  required
+                  disabled={loading}
                 />
               </div>
               <div>
                 <label className="block text-gray-400 mb-2">Subject</label>
-                <select className="w-full bg-black/60 border border-gray-800/50 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-500/50">
+                <select 
+                  name="queryType"
+                  value={formData.queryType}
+                  onChange={handleChange}
+                  className="w-full bg-black/60 border border-gray-800/50 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-500/50"
+                  disabled={loading}
+                >
                   <option>General Inquiry</option>
                   <option>Technical Support</option>
                   <option>Billing Question</option>
@@ -51,15 +184,21 @@ export default function ContactPage() {
                 <label className="block text-gray-400 mb-2">Message</label>
                 <textarea 
                   rows={5}
+                  name="query"
+                  value={formData.query}
+                  onChange={handleChange}
                   className="w-full bg-black/60 border border-gray-800/50 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-500/50 resize-none"
                   placeholder="Tell us how we can help you..."
+                  required
+                  disabled={loading}
                 />
               </div>
               <button 
                 type="submit"
-                className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-all duration-300"
+                className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading}
               >
-                Send Message
+                {loading ? "Sending..." : "Send Message"}
               </button>
             </form>
           </div>
@@ -175,28 +314,16 @@ export default function ContactPage() {
                   </svg>
                   GitHub
                 </a>
-                <a 
-                  href="https://github.com/Rudra-Sankha-Sinhamahapatra/Better-Uptime"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-gradient-to-br from-green-500/30 via-green-600/20 to-green-700/30 text-white py-3 rounded-lg font-medium hover:from-green-500/40 hover:via-green-600/30 hover:to-green-700/40 transition-all duration-300 flex items-center justify-center gap-2 border border-green-500/20"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                  </svg>
-                  Portfolio
-                </a>
               </div>
             </div>
           </div>
         </div>
 
-        {/* FAQ Link */}
         <div className="mt-12 bg-gradient-to-br from-green-500/20 via-transparent to-green-500/10 rounded-2xl p-6 border border-gray-800/50 backdrop-blur-sm relative">
-                      <h3 className="text-xl font-semibold mb-3 text-green-400 flex items-center gap-3">
-              <Lightbulb className="w-5 h-5 text-white" />
-              Frequently Asked Questions
-            </h3>
+          <h3 className="text-xl font-semibold mb-3 text-green-400 flex items-center gap-3">
+            <Lightbulb className="w-5 h-5 text-white" />
+            Frequently Asked Questions
+          </h3>
           <p className="text-gray-400 mb-4">
             Before reaching out, you might find your answer in our comprehensive FAQ section.
           </p>

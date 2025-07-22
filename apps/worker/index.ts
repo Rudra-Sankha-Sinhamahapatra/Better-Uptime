@@ -3,7 +3,7 @@ import { config } from "./config";
 import { checkWebsite } from "./monitoring";
 import prisma, { WebsiteStatus } from "@repo/db/client";
 import type { AmqpChannel, AmqpConnection } from "./types/amqp";
-import { closeEmailQueue, queueDowntimeEmail, queueUptimeEmail } from "./services/emailQueue";
+import { closeEmailQueue, queueDowntimeEmail, queueUptimeEmail, queueContactFormEmail } from "./services/emailQueue";
 
 
 let connection: AmqpConnection | null = null;
@@ -59,7 +59,24 @@ const startWorker = async () => {
 
         try {
             const data = JSON.parse(message.content.toString());
-            console.log("Processing message", {
+            
+            // Handle contact form messages
+            if (data.type === 'contact_form') {
+                console.log("Processing contact form message:", {
+                    name: data.data.name,
+                    email: data.data.email,
+                    queryType: data.data.queryType,
+                    isLoggedIn: data.data.isLoggedIn
+                });
+
+                await queueContactFormEmail(data.data);
+                console.log("Contact form email queued successfully");
+                channel.ack(message);
+                return;
+            }
+
+            // Handle website monitoring messages (existing logic)
+            console.log("Processing website monitoring message", {
                 websiteId: data.websiteId,
                 url: data.url,
             });
