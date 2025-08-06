@@ -26,7 +26,7 @@ export async function connectToRabbitMQ() {
             channel = null;
         });
         
-        channel = await connection.createChannel();
+        channel = await connection.createConfirmChannel();
 
         channel.on('error', (err) => {
             console.error('🔴 RabbitMQ Channel Error:', err);
@@ -113,13 +113,14 @@ export const publishBatchToQueue = async (messages: WebsiteMonitoringMessage[]) 
         }
         if(!channel) throw new Error("Channel not found");
 
-        for (const message of messages) {
+
+        const promises = messages.map(message => {
             const messageWithTimeStamp = {
                 ...message,
                 timestamp: Date.now(),
-            }
+            };
 
-            await channel.sendToQueue(
+            return channel!.sendToQueue(
                 config.rabbitmq.queueName,
                 Buffer.from(JSON.stringify(messageWithTimeStamp)),
                 {
@@ -130,8 +131,10 @@ export const publishBatchToQueue = async (messages: WebsiteMonitoringMessage[]) 
                     messageId: message.websiteId
                 }
             );
-        }
-        
+        });
+
+        await Promise.all(promises);
+
         console.log(`Published batch of ${messages.length} messages to queue`);
         return true;
     } catch (error) {
