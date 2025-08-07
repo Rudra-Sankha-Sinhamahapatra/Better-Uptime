@@ -27,6 +27,7 @@ https://github.com/user-attachments/assets/b115c62a-99b5-4f0a-b3d3-3059a30492d8
 - **Worker**: TypeScript (with planned Go migration)
 - **Message Queues**: 
   - RabbitMQ for monitoring tasks
+  - Bull Queue (Redis) for database operations and scalability
   - Redis for email notifications
 - **Email Service**: Nodemailer with Gmail SMTP
 - **Database**: PostgreSQL with Prisma
@@ -108,7 +109,9 @@ The architecture consists of several key components working together:
 3. **Worker**:
    - Consumes monitoring tasks from RabbitMQ
    - Performs actual website status checks
-   - Reports status and response times back to DB
+   - Queues database operations via Bull Queue to prevent DB overload:
+     - Website tick creation with response times and status
+     - Handles 1000+ concurrent monitoring without database connection exhaustion
    - Manages email notifications through Redis queue:
      - Queues downtime notifications
      - Queues recovery notifications
@@ -117,6 +120,10 @@ The architecture consists of several key components working together:
 
 4. **Message Queues**:
    - RabbitMQ for monitoring tasks
+   - Bull Queue (Redis) for database operations:
+     - Prevents database overload during high-volume monitoring
+     - Ensures reliable database writes with retry logic
+     - Scales to handle 1000+ concurrent website checks
    - Redis for reliable email notification delivery:
      - Priority-based email queuing
      - Automatic retries with exponential backoff
@@ -135,10 +142,11 @@ Key components:
 1. **Web Interface**: React-based dashboard for managing monitored websites and viewing their status
 2. **API Server**: Handles website management and publishes monitoring tasks with user email info
 3. **RabbitMQ**: Message queue for distributing monitoring tasks
-4. **Redis**: Handles reliable email notification delivery with retries
-5. **Worker Service**: Consumes monitoring tasks, performs website checks, and manages notifications
-6. **PostgreSQL**: Stores website data, monitoring history, and user information
-7. **Email Service**: Processes queued notifications via Gmail SMTP
+4. **Bull Queue**: Handles database operations to prevent overload during high-volume monitoring
+5. **Redis**: Handles reliable email notification delivery with retries
+6. **Worker Service**: Consumes monitoring tasks, performs website checks, queues DB operations, and manages notifications
+7. **PostgreSQL**: Stores website data, monitoring history, and user information
+8. **Email Service**: Processes queued notifications via Gmail SMTP
 
 ## Development
 
