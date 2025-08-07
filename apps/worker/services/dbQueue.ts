@@ -49,7 +49,7 @@ if(status === WebsiteStatus.Down && previousStatus === WebsiteStatus.Up) {
 }
 });
 
-export const queueDbOperation = async (data:DbJob) => {
+export const queueDbOperation = async (data: DbJob) => {
     return dbQueue.add(data);
 }
 
