@@ -25,7 +25,7 @@ const emailQueue = new Queue<EmailJob>('email-notifications',config.redis.redisU
     }
 })
 
-emailQueue.process(async (job) => {
+emailQueue.process(10,async (job) => {
     const { to,subject,text } = job.data;
 
     try {

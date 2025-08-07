@@ -26,7 +26,7 @@ const dbQueue = new Queue<DbJob>('db-operations', REDIS_URL, {
     },
 });
 
-dbQueue.process(async (job) => {
+dbQueue.process(10,async (job) => {
     const { websiteId, responseTimeMs, status, regionId, userEmail, url, previousStatus } = job.data;
    console.log(`Processing DB job for website ${websiteId} with status ${status}`);
     try {

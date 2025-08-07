@@ -4,3 +4,7 @@ export interface MonitoringResult {
     responseTimeMs: number;
     status: WebsiteStatus;
 }
+export interface Region {
+    id: string,
+    name: string
+}
