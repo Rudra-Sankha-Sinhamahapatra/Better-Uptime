@@ -2,6 +2,11 @@
   "name": "@repo/db",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "studio": "bunx prisma studio",
+    "migrate": "bunx prisma migrate dev",
+    "generate": "bunx prisma generate"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "prisma": "^6.8.2"
