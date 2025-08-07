@@ -55,6 +55,7 @@ export const queueEmail = async (emailData: EmailJob) => {
 }
 
 export const queueDowntimeEmail = async (to: string, websiteUrl: string) => {
+    console.log(`Queueing downtime email for ${to} - ${websiteUrl}`);
     return queueEmail({
         to,
         subject: `🔴 Website ${websiteUrl} is down`,
@@ -65,6 +66,7 @@ export const queueDowntimeEmail = async (to: string, websiteUrl: string) => {
 };
 
 export const queueUptimeEmail = async (to: string, websiteUrl: string) => {
+    console.log(`Queueing uptime email for ${to} - ${websiteUrl}`);
     return queueEmail({
         to,
         subject: `✅ Website ${websiteUrl} is back up`,
@@ -80,6 +82,8 @@ export const queueContactFormEmail = async (contactData: ContactFormEmailData) =
     if (!ownerEmail) {
         throw new Error("Owner email not configured");
     }
+
+    console.log(`Queueing contact form email for ${contactData.email} - ${contactData.queryType}`);
     
     const userInfo = contactData.isLoggedIn 
         ? `\n👤 Submitted Form Data:
