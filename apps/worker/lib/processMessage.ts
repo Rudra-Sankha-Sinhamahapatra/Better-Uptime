@@ -12,7 +12,7 @@ export const processMessage = async (
 ): Promise<void> => {
     try {
        await new Promise(resolve => setTimeout(resolve, 100)); 
-       
+
         const data = JSON.parse(message.content.toString());
 
         // contact form 
@@ -36,26 +36,10 @@ export const processMessage = async (
             url: data.url,
         });
 
-        const [result, website, previousTick] = await Promise.all([
-            checkWebsite(data.url),
-            prisma.website.findUnique({
-                where: { id: data.websiteId },
-                include: { user: true }
-            }),
-            prisma.websiteTick.findFirst({
-                where: { websiteId: data.websiteId },
-                orderBy: { createdAt: 'desc' }
-            })
-        ]);
+        const result = await checkWebsite(data.url);
 
         if (!result) {
             console.error("No result from checkWebsite", data.url);
-            channel.nack(message, false, false);
-            return;
-        }
-
-        if (!website) {
-            console.error("Website not found", data.websiteId);
             channel.nack(message, false, false);
             return;
         }
@@ -65,9 +49,9 @@ export const processMessage = async (
             responseTimeMs: result.responseTimeMs,
             status: result.status,
             regionId: defaultRegion.id,
-            userEmail: website.user.email,
+            userEmail: data.userEmail,
             url: data.url,
-            previousStatus: previousTick?.status as WebsiteStatus
+            previousStatus: data.previousStatus as WebsiteStatus ||  WebsiteStatus.Unknown
         });
 
         console.log(`Check completed for ${data.url}:`, result);
