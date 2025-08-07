@@ -11,6 +11,8 @@ export const processMessage = async (
     defaultRegion: Region,
 ): Promise<void> => {
     try {
+       await new Promise(resolve => setTimeout(resolve, 100)); 
+       
         const data = JSON.parse(message.content.toString());
 
         // contact form 

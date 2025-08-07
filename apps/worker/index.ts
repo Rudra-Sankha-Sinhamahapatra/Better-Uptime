@@ -38,7 +38,7 @@ const startWorker = async () => {
         connection = await amqp.connect(config.rabbitmq.rabbitMqUrl as string);
         channel = await connection.createChannel();
 
-        await channel.prefetch(20);
+        await channel.prefetch(10);
 
         await channel.assertQueue(config.rabbitmq.queueName, {
             durable: true,
@@ -63,10 +63,7 @@ const startWorker = async () => {
         activeChannel.consume(config.rabbitmq.queueName, async (message: Message | null) => {
             if (!message) return;
 
-            processMessage(message, activeChannel, defaultRegion).catch(error => {
-                console.error("Error processing message", error);
-                activeChannel.nack(message, false, false);
-            });
+            processMessage(message, activeChannel, defaultRegion);
         }, {
             noAck: false
         });
