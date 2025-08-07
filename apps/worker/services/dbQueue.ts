@@ -1,4 +1,4 @@
-import Queue  from "bull";
+import Queue from "bull";
 import { config } from "../config";
 import prisma, { WebsiteStatus } from "@repo/db/client";
 import { queueDowntimeEmail, queueUptimeEmail } from "./emailQueue";
