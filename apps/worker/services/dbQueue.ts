@@ -39,7 +39,7 @@ dbQueue.process(async (job) => {
         }
     });
     } catch(error) {
-        console.error('Failed to push to db');
+        console.error(`Failed to push to db for websiteId: ${websiteId}`, error);
         throw error; 
     }
 if(status === WebsiteStatus.Down && previousStatus === WebsiteStatus.Up) {
