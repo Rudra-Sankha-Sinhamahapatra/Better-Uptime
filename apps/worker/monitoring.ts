@@ -6,7 +6,7 @@ const startTime = Date.now();
  
 try {
     const response = await axios.get(url, {
-        timeout: 40000, // 40 seconds timeout
+        timeout: 10000, // 10 seconds timeout
         maxRedirects: 5, // redirects
         validateStatus: null, //  all status codes to be processed
         headers: {
