@@ -5,6 +5,6 @@ export interface MonitoringResult {
     status: WebsiteStatus;
 }
 export interface Region {
-    id:string,
+    id: string,
     name: string
 }
