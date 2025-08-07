@@ -112,7 +112,7 @@ const startWorker = async () => {
                     responseTimeMs: result.responseTimeMs,
                     status: result.status,
                     regionId: defaultRegion.id,
-                    userEmail:  website.user.email,
+                    userEmail: website.user.email,
                     url: data.url,
                     previousStatus: previousTick?.status as WebsiteStatus
                 })
