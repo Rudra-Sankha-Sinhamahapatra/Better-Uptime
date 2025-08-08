@@ -2,12 +2,13 @@ import prisma from "@repo/db/client";
 import cron from "node-cron";
 import { publishBatchToQueue } from "./rabbitmq";
 
-const MIN_CHECK_INTERVAL = 1000 * 60 * 5;
+const MIN_CHECK_INTERVAL = 1000 * 60 * 4;
 
 export const startScheduler = () => {
     // Every 5 minutes
     cron.schedule("*/5 * * * *", async () => {
         try {
+            const fourMinutesAgo = new Date(Date.now() - MIN_CHECK_INTERVAL);
             const websites = await prisma.website.findMany({
                 where: {
                     OR: [
@@ -18,7 +19,7 @@ export const startScheduler = () => {
                             websiteTicks: {
                                 none: {
                                     createdAt: {
-                                        gte: new Date(Date.now() - MIN_CHECK_INTERVAL)
+                                        gt: fourMinutesAgo
                                     }
                                 }
                             },
@@ -47,7 +48,7 @@ export const startScheduler = () => {
                     timeAdded: "asc",
                 },
             });
-
+          
             if (websites.length > 0) {
                 const messages = websites.map(website => ({
                     websiteId: website.id,
