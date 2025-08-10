@@ -4,7 +4,7 @@ import { Rocket, Lightbulb, Settings, Star, Target } from "lucide-react";
 
 export default function AboutPage() {
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen bg-black px-4 py-24">
+    <div className="relative flex flex-col items-center justify-center min-h-screen bg-black px-4 pt-12 pb-24">
       <HeroGradient />
       
       <div className="relative z-10 text-white text-center max-w-4xl">

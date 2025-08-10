@@ -146,7 +146,7 @@ export default function WebsiteDetailPage() {
   }
 
   return (
-    <div className="relative min-h-screen pt-20 bg-black">
+    <div className="relative min-h-screen bg-black">
       <WebsitesGradient />
       <motion.div
         className="absolute inset-0 opacity-40"
