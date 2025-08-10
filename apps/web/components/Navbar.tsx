@@ -25,19 +25,19 @@ export const Navbar = () => {
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm border-b border-white/10">
-           <NavbarGradient/>
+            <NavbarGradient />
             <div className="container mx-auto px-4 sm:px-6 py-4 relative">
                 {/* Mobile Layout - Completely separate structure */}
                 <div className="sm:hidden">
                     <div className="flex items-center justify-between w-full">
-                        {/* Logo - Left */}
+
                         <div className="flex items-center">
                             <Link href="/" className="flex items-center gap-2">
-                                <Image 
-                                    src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/4/supabase-icon-kpjasdqlnu8exakst6f44r.png/supabase-icon-5uqgeeqeknngv9las8zeef.png?_a=DAJFJtWIZAAC" 
-                                    alt="Logo" 
-                                    width={24} 
-                                    height={24} 
+                                <Image
+                                    src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/4/supabase-icon-kpjasdqlnu8exakst6f44r.png/supabase-icon-5uqgeeqeknngv9las8zeef.png?_a=DAJFJtWIZAAC"
+                                    alt="Logo"
+                                    width={24}
+                                    height={24}
                                     className="hover:opacity-80 transition-opacity"
                                 />
                                 <span className="text-white font-semibold text-lg">BetterUptime</span>
@@ -48,10 +48,10 @@ export const Navbar = () => {
                         <div className="relative w-32 h-10">
                             {/* Mobile Profile - Absolute left */}
                             <div className="absolute left-0 top-0">
-                                <UserProfile> 
+                                <UserProfile>
                                     {(session: Session | null) => !session ? (
-                                        <Link 
-                                            href="/signin" 
+                                        <Link
+                                            href="/signin"
                                             className="text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-colors text-xs px-2 py-1 rounded border border-green-600/50 whitespace-nowrap"
                                         >
                                             Sign In
@@ -118,10 +118,10 @@ export const Navbar = () => {
                                     onClick={toggleMobileMenu}
                                     aria-label="Toggle menu"
                                 >
-                                    <svg 
-                                        className="w-4 h-4" 
-                                        fill="none" 
-                                        stroke="currentColor" 
+                                    <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
                                         viewBox="0 0 24 24"
                                     >
                                         {isMobileMenuOpen ? (
@@ -141,17 +141,17 @@ export const Navbar = () => {
                     {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center gap-2">
-                            <Image 
-                                src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/4/supabase-icon-kpjasdqlnu8exakst6f44r.png/supabase-icon-5uqgeeqeknngv9las8zeef.png?_a=DAJFJtWIZAAC" 
-                                alt="Logo" 
-                                width={24} 
-                                height={24} 
+                            <Image
+                                src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/4/supabase-icon-kpjasdqlnu8exakst6f44r.png/supabase-icon-5uqgeeqeknngv9las8zeef.png?_a=DAJFJtWIZAAC"
+                                alt="Logo"
+                                width={24}
+                                height={24}
                                 className="hover:opacity-80 transition-opacity"
                             />
                             <span className="text-white font-semibold text-lg">BetterUptime</span>
                         </Link>
                     </div>
-                        
+
                     {/* Navigation */}
                     <div className="flex items-center gap-2 sm:gap-4 md:gap-4 lg:gap-6">
                         <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors">
@@ -170,17 +170,17 @@ export const Navbar = () => {
 
                     {/* Auth */}
                     <div className="flex items-center gap-4">
-                        <UserProfile> 
+                        <UserProfile>
                             {(session: Session | null) => !session ? (
                                 <>
-                                    <Link 
-                                        href="/signin" 
+                                    <Link
+                                        href="/signin"
                                         className="text-gray-300 hover:text-white transition-colors"
                                     >
                                         Log in
                                     </Link>
-                                    <Link 
-                                        href="/signin" 
+                                    <Link
+                                        href="/signin"
                                         className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2 rounded-lg transition-colors border border-green-600/30"
                                     >
                                         Get Started
@@ -247,29 +247,29 @@ export const Navbar = () => {
                     <div className="sm:hidden mt-4 pb-4 border-t border-white/10 relative z-[9997]">
                         <div className="flex flex-col space-y-4 pt-4">
                             {/* Navigation links only - profile is completely separate */}
-                            <Link 
-                                href="/pricing" 
+                            <Link
+                                href="/pricing"
                                 className="text-gray-300 hover:text-white transition-colors py-2"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 Pricing
                             </Link>
-                            <Link 
-                                href="/about" 
+                            <Link
+                                href="/about"
                                 className="text-gray-300 hover:text-white transition-colors py-2"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 About
                             </Link>
-                            <Link 
-                                href="/contact" 
+                            <Link
+                                href="/contact"
                                 className="text-gray-300 hover:text-white transition-colors py-2"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 Contact
                             </Link>
-                            <Link 
-                                href="/disclaimer" 
+                            <Link
+                                href="/disclaimer"
                                 className="text-amber-300 hover:text-amber-400 transition-colors py-2"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
