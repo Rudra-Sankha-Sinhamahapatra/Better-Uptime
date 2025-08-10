@@ -2,6 +2,7 @@ import prisma from "@repo/db/client";
 import type { Request, Response } from "express";
 import { publishToQueue } from "../services/rabbitmq";
 import type { WebsiteMonitoringMessage } from "../types/queue";
+import { subHours } from "date-fns";
 
 export const allWebsites = async (req: Request, res: Response) => {
     try {
@@ -129,3 +130,49 @@ export const allWebsites = async (req: Request, res: Response) => {
       return;
     }
   };
+
+  export const getWebsiteTicks = async (req:Request,res:Response) => {
+    try {
+      const { websiteId } = req.params;
+      const hoursParam = req.query.hours ? Number(req.query.hours) : 24;
+      const hours = Number.isFinite(hoursParam) && hoursParam > 0 ? hoursParam : 24;
+      const from = subHours(new Date(), hours);
+
+      const website = await prisma.website.findUnique({
+        where: { id: websiteId },
+        select: { id: true },
+      });
+
+      if(!website) {
+        res.status(404).json({ error: "Website not found" });
+        return;
+      }
+
+      const ticks = await prisma.websiteTick.findMany({
+        where: {
+          websiteId,
+          createdAt: {gte: from},
+        },
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          response_time_ms: true,
+          status: true,
+          createdAt: true,
+          regionId: true,
+        },
+      });
+
+      res.status(200).json({
+        websiteId,
+        rangeHours: hours,
+        count: ticks.length,
+        ticks
+      });
+
+    } catch (error) {
+      console.error("Error fetching website ticks:", error);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+  }

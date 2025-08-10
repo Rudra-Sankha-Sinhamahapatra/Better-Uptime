@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
-import { allWebsites, createWebsite, getWebsiteById } from "./controllers/website";
+import { allWebsites, createWebsite, getWebsiteById, getWebsiteTicks } from "./controllers/website";
 import { connectToRabbitMQ } from "./services/rabbitmq";
 import { config } from "./config";
 import { shutdown } from "./utils/shutdown";
@@ -25,6 +25,8 @@ app.use(cors({
 app.get("/queue-health", queueHealth);
 
 app.get("/website", allWebsites);
+
+app.get("/website/:websiteId/ticks", getWebsiteTicks);
 
 app.post("/website", createWebsite);
 
