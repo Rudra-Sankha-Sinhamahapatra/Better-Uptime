@@ -7,7 +7,7 @@ export default function PricingPage() {
     <div className="relative flex flex-col items-center justify-center min-h-screen bg-black px-4 py-20">
       <HeroGradient />
       
-      <div className="relative z-10 text-white text-center max-w-6xl">
+      <div className="relative z-10 text-white text-center max-w-6xl mt-6">
         {/* Title */}
         <h1 className="text-5xl font-bold mb-8 bg-gradient-to-r from-white via-green-400 to-white bg-clip-text text-transparent">
           Simple, Transparent Pricing
