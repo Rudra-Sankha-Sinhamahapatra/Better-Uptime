@@ -2,12 +2,12 @@
 import { authClient } from "@/lib/auth-client";
 import { AddWebsiteProps } from "@/types/website";
 import { config } from "@/utils/config";
-import { AnimatePresence,motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import React, { useState } from "react";
 
 
-export const AddWebsite = ({onWebsiteAdded}: AddWebsiteProps) => {
+export const AddWebsite = ({ onWebsiteAdded }: AddWebsiteProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [name, setName] = useState("");
     const [url, setUrl] = useState("");
@@ -28,11 +28,11 @@ export const AddWebsite = ({onWebsiteAdded}: AddWebsiteProps) => {
             });
 
             if (!response.ok) throw new Error("Failed to add website");
-            
+
             setName("");
             setUrl("");
             setIsModalOpen(false);
-            
+
             if (onWebsiteAdded) {
                 setTimeout(() => {
                     onWebsiteAdded();
@@ -47,23 +47,23 @@ export const AddWebsite = ({onWebsiteAdded}: AddWebsiteProps) => {
 
     return (
         <>
-                <button 
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold mt-4 
+            <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold mt-4 
                     hover:bg-green-700 transition-all duration-300"
-                >
-                    Add Website
-                </button>
+            >
+                Add Website
+            </button>
 
             <AnimatePresence>
                 {isModalOpen && (
-                    <motion.div 
+                    <motion.div
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
-                        <motion.div 
+                        <motion.div
                             className="bg-gradient-to-br from-green-500/20 via-transparent to-green-500/10 rounded-2xl p-8 w-full max-w-md border border-gray-800/50 relative"
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
@@ -107,7 +107,7 @@ export const AddWebsite = ({onWebsiteAdded}: AddWebsiteProps) => {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        
+
                                         className="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold 
                                         hover:bg-green-700 transition-all duration-300 disabled:opacity-50"
                                     >
