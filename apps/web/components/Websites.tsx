@@ -57,7 +57,7 @@ export default function Websites() {
     }
 
     return (
-        <div className="relative min-h-screen pt-20">
+        <div className="relative min-h-screen">
             <WebsitesGradient/>
 
             <div className="relative z-10 p-8 pt-16 max-w-7xl mx-auto">
