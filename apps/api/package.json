@@ -21,6 +21,7 @@
     "amqplib": "^0.10.8",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "express": "^5.1.0",
     "node-cron": "^4.1.0"
   }
