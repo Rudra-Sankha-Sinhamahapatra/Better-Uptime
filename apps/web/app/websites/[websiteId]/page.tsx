@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { config } from "@/utils/config";
 import { authClient } from "@/lib/auth-client";
@@ -67,6 +67,111 @@ function LineTooltip({ active, payload, period }: LineTooltipProps) {
     <div className="rounded-lg border border-green-500/30 bg-gradient-to-br from-black via-green-600/20 to-black px-3 py-2 shadow-[0_0_20px_rgba(34,197,94,0.15)]">
       <div className="text-white text-sm mb-1">{timeDisplay}</div>
       <div className="text-sm text-green-300">Response: {p.ms} ms</div>
+    </div>
+  );
+}
+
+function CustomSelect({ 
+  value, 
+  onChange, 
+  options 
+}: { 
+  value: TimePeriod; 
+  onChange: (value: TimePeriod) => void; 
+  options: { value: TimePeriod; label: string }[] 
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={dropdownRef} className="relative">
+      <motion.div
+        className="absolute inset-0 opacity-30 rounded-xl"
+        animate={{
+          background: [
+            "radial-gradient(circle at 0% 0%, transparent 0%, rgb(34 197 94 / 0.1) 25%, transparent 50%)",
+            "radial-gradient(circle at 100% 100%, transparent 0%, rgb(34 197 94 / 0.1) 25%, transparent 50%)",
+            "radial-gradient(circle at 0% 100%, transparent 0%, rgb(34 197 94 / 0.1) 25%, transparent 50%)",
+            "radial-gradient(circle at 100% 0%, transparent 0%, rgb(34 197 94 / 0.1) 25%, transparent 50%)",
+            "radial-gradient(circle at 0% 0%, transparent 0%, rgb(34 197 94 / 0.1) 25%, transparent 50%)",
+          ],
+        }}
+        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+      />
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative z-10 w-full bg-gradient-to-br from-black/80 via-green-900/20 to-black/80 border border-gray-700/50 rounded-xl px-4 py-3 text-white text-sm font-medium backdrop-blur-sm hover:border-green-500/60 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500/60 transition-all duration-200 cursor-pointer min-w-[140px] shadow-lg flex items-center justify-between"
+      >
+        <span>Last {TIME_PERIODS[value].label}</span>
+        <svg 
+          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+          fill="none" 
+          viewBox="0 0 20 20"
+        >
+          <path stroke="#22c55e" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 8l4 4 4-4"/>
+        </svg>
+      </button>
+      
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-gradient-to-br from-black/95 via-green-900/20 to-black/95 border border-gray-700/50 rounded-xl shadow-xl backdrop-blur-sm z-50 overflow-hidden">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => {
+                onChange(option.value);
+                setIsOpen(false);
+              }}
+              className={`w-full px-4 py-3 text-left text-sm text-white hover:bg-gradient-to-r hover:from-green-900/50 hover:via-green-800/40 hover:to-green-900/50 transition-all duration-200 flex items-center justify-between group ${
+                value === option.value ? 'text-green-300' : ''
+              }`}
+            >
+              <span className="flex-1">{option.label}</span>
+              {value === option.value && (
+                <svg 
+                  className="w-4 h-4 text-green-400 ml-2" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M5 13l4 4L19 7" 
+                  />
+                </svg>
+              )}
+              {value !== option.value && (
+                <div className="w-4 h-4 ml-2 opacity-0 group-hover:opacity-30 transition-opacity duration-200">
+                  <svg 
+                    className="w-4 h-4 text-green-400" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M9 5l7 7-7 7" 
+                    />
+                  </svg>
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -288,18 +393,77 @@ export default function WebsiteDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm">
-            <div className="text-gray-400 text-sm">Uptime ({TIME_PERIODS[selectedPeriod].label})</div>
-            <div className="text-3xl font-semibold text-white">{metrics.upPct}%</div>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
+            <div className="relative overflow-hidden group bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 hover:border-green-500/40">
+              <motion.div
+                className="absolute inset-0 opacity-40"
+                animate={{
+                  background: [
+                    "radial-gradient(circle at 0% 0%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 100% 100%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 0% 100%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 100% 0%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 0% 0%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                  ],
+                }}
+                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+              />
+              <div className="relative z-10">
+                <div className="text-gray-400 text-sm">Uptime ({TIME_PERIODS[selectedPeriod].label})</div>
+                <div className="text-3xl font-semibold text-white">{metrics.upPct}%</div>
+              </div>
+            </div>
+            <div className="relative overflow-hidden group bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 hover:border-green-500/40">
+              <motion.div
+                className="absolute inset-0 opacity-40"
+                animate={{
+                  background: [
+                    "radial-gradient(circle at 100% 0%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 0% 100%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 100% 100%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 0% 0%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 100% 0%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                  ],
+                }}
+                transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+              />
+              <div className="relative z-10">
+                <div className="text-gray-400 text-sm">Avg Response</div>
+                <div className="text-3xl font-semibold text-white">{metrics.avgMs} ms</div>
+              </div>
+            </div>
+            <div className="relative overflow-hidden group bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 hover:border-green-500/40">
+              <motion.div
+                className="absolute inset-0 opacity-40"
+                animate={{
+                  background: [
+                    "radial-gradient(circle at 50% 50%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 0% 0%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 100% 0%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 100% 100%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                    "radial-gradient(circle at 50% 50%, transparent 0%, rgb(34 197 94 / 0.08) 25%, transparent 50%)",
+                  ],
+                }}
+                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              />
+              <div className="relative z-10">
+                <div className="text-gray-400 text-sm">P95 Response</div>
+                <div className="text-3xl font-semibold text-white">{metrics.p95Ms} ms</div>
+              </div>
+            </div>
           </div>
-          <div className="bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm">
-            <div className="text-gray-400 text-sm">Avg Response</div>
-            <div className="text-3xl font-semibold text-white">{metrics.avgMs} ms</div>
-          </div>
-          <div className="bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm">
-            <div className="text-gray-400 text-sm">P95 Response</div>
-            <div className="text-3xl font-semibold text-white">{metrics.p95Ms} ms</div>
+          
+          <div className="lg:w-auto w-full flex justify-center lg:justify-end">
+            <CustomSelect
+              value={selectedPeriod}
+              onChange={handlePeriodChange}
+              options={[
+                { value: "24h", label: "Last 24h" },
+                { value: "7d", label: "Last 7d" },
+                { value: "30d", label: "Last 30d" }
+              ]}
+            />
           </div>
         </div>
 
@@ -413,21 +577,7 @@ export default function WebsiteDetailPage() {
           </div>
         </div>
 
-        <div className="mt-8 flex items-center gap-3 justify-center">
-          {(Object.keys(TIME_PERIODS) as TimePeriod[]).map((period) => (
-            <button
-              key={period}
-              onClick={() => handlePeriodChange(period)}
-              className={`px-4 py-2 rounded-full border transition-all duration-200 ${
-                selectedPeriod === period
-                  ? "border-green-500/30 text-white bg-green-600/20 shadow-[0_0_20px_rgba(34,197,94,0.15)]"
-                  : "border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-300"
-              }`}
-            >
-              {TIME_PERIODS[period].label}
-            </button>
-          ))}
-        </div>
+
       </div>
     </div>
   );
