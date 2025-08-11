@@ -9,42 +9,64 @@ import type { WebsiteTick } from "@/types/tick";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Cell } from "recharts";
 import { WebsitesGradient } from "@/components/ui/WebsitesGradient";
 import { motion } from "framer-motion";
+import type { TimePeriod, StatusTooltipProps, LineTooltipProps } from "@/types/websiteStatus";
 
-function formatTime(ts: string) {
+const TIME_PERIODS: Record<TimePeriod, { hours: number; label: string }> = {
+  "24h": { hours: 24, label: "24h" },
+  "7d": { hours: 168, label: "7d" },
+  "30d": { hours: 720, label: "30d" }, 
+};
+
+function formatTime(ts: string, period: TimePeriod): string {
   const d = new Date(ts);
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  
+  if (period === "24h") {
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } else if (period === "7d") {
+    return d.toLocaleDateString([], { month: "short", day: "numeric" });
+  } else {
+    return d.toLocaleDateString([], { month: "short", day: "numeric" });
+  }
 }
 
-function statusColor(status: WebsiteTick["status"]) {
+function statusColor(status: WebsiteTick["status"]): string {
   if (status === "Up") return "#22c55e";
   if (status === "Down") return "#ef4444";
   return "#9ca3af";
 }
 
-function StatusTooltip({ active, payload }: any) {
+function StatusTooltip({ active, payload, period }: StatusTooltipProps) {
   if (!active || !payload || !payload.length) return null;
   const p = payload[0]?.payload;
-  const isUp = p?.value === 1;
-  const isDown = p?.value === -1;
-  const statusText = isUp ? "Up" : isDown ? "Down" : "Unknown";
-  const statusClass = isUp ? "text-green-400" : isDown ? "text-red-400" : "text-gray-300";
+  
+  if (!p || !p.fullTime) return null;
+  
+  const timeDisplay = new Date(p.fullTime).toLocaleString();
+  const status = p.status;
+  const statusClass = status === "Up" ? "text-green-400" : status === "Down" ? "text-red-400" : "text-gray-300";
+  
   return (
-    <div className="rounded-lg border border-green-500/30  bg-gradient-to-br from-black via-green-600/20 to-green/60 px-3 py-2 shadow-[0_0_20px_rgba(34,197,94,0.15)]">
-      <div className="text-white text-sm mb-1">{p?.time}</div>
+    <div className="rounded-lg border border-green-500/30 bg-gradient-to-br from-black via-green-600/20 to-green/60 px-3 py-2 shadow-[0_0_20px_rgba(34,197,94,0.15)]">
+      <div className="text-white text-sm mb-1">{timeDisplay}</div>
       <div className="text-sm text-gray-300">
-        Status: <span className={statusClass}>{statusText}</span>
+        Status: <span className={statusClass}>{status}</span>
       </div>
     </div>
   );
 }
 
-function LineTooltip({ active, payload }: any) {
+function LineTooltip({ active, payload, period }: LineTooltipProps) {
   if (!active || !payload || !payload.length) return null;
   const p = payload[0]?.payload;
+  
+  if (!p || !p.fullTime) return null;
+  
+  const timeDisplay = new Date(p.fullTime).toLocaleString();
+  
   return (
     <div className="rounded-lg border border-green-500/30 bg-gradient-to-br from-black via-green-600/20 to-black px-3 py-2 shadow-[0_0_20px_rgba(34,197,94,0.15)]">
-      <div className="text-white text-sm mb-1">{p?.time}</div>
-      <div className="text-sm text-green-300">Response: {p?.ms} ms</div>
+      <div className="text-white text-sm mb-1">{timeDisplay}</div>
+      <div className="text-sm text-green-300">Response: {p.ms} ms</div>
     </div>
   );
 }
@@ -57,8 +79,9 @@ export default function WebsiteDetailPage() {
   const [website, setWebsite] = useState<Website | null>(null);
   const [ticks, setTicks] = useState<WebsiteTick[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("24h");
 
-  const fetchData = async () => {
+  const fetchData = async (period: TimePeriod = selectedPeriod) => {
     setLoading(true);
     setError(null);
     try {
@@ -68,9 +91,10 @@ export default function WebsiteDetailPage() {
         headers.Authorization = `Bearer ${session.data.session.token}`;
       }
 
+      const hours = TIME_PERIODS[period].hours;
       const [websiteRes, ticksRes] = await Promise.all([
         fetch(`${config.backendUrl}/website/${websiteId}`, { headers }),
-        fetch(`${config.backendUrl}/website/${websiteId}/ticks?hours=24`, { headers }),
+        fetch(`${config.backendUrl}/website/${websiteId}/ticks?hours=${hours}`, { headers }),
       ]);
 
       if (!websiteRes.ok) throw new Error("Failed to load website");
@@ -81,8 +105,8 @@ export default function WebsiteDetailPage() {
 
       setWebsite(websiteData);
       setTicks(ticksData.ticks || []);
-    } catch (e: any) {
-      setError(e.message || "Failed to load data");
+    } catch (e: unknown) {
+      setError((e as Error).message || "Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -90,11 +114,17 @@ export default function WebsiteDetailPage() {
 
   useEffect(() => {
     if (websiteId) {
-      fetchData();
-      const interval = setInterval(fetchData, 60_000); // refresh every minute
-      return () => clearInterval(interval);
+      fetchData(selectedPeriod);
+      if (selectedPeriod === "24h") {
+        const interval = setInterval(() => fetchData(selectedPeriod), 60_000);
+        return () => clearInterval(interval);
+      }
     }
-  }, [websiteId]);
+  }, [websiteId, selectedPeriod]);
+
+  const handlePeriodChange = (period: TimePeriod) => {
+    setSelectedPeriod(period);
+  };
 
   const metrics = useMemo(() => {
     if (!ticks.length) return { avgMs: 0, p95Ms: 0, upPct: 0 };
@@ -108,23 +138,86 @@ export default function WebsiteDetailPage() {
 
   const lineData = useMemo(
     () =>
-      ticks.map(t => ({
-        time: formatTime(t.createdAt),
+      ticks.map((t, index) => ({
+        time: formatTime(t.createdAt, selectedPeriod),
+        fullTime: t.createdAt,
         ms: t.response_time_ms,
+        index,
+        tickId: t.id,
+        uniqueKey: `${formatTime(t.createdAt, selectedPeriod)}-${index}`,
       })),
-    [ticks]
+    [ticks, selectedPeriod]
   );
 
   const statusData = useMemo(
     () =>
-      ticks.map((t, i) => ({
-        idx: i, 
-        time: formatTime(t.createdAt),
+      ticks.map((t, index) => ({
+        idx: index, 
+        time: formatTime(t.createdAt, selectedPeriod),
+        fullTime: t.createdAt,
         value: t.status === "Up" ? 1 : t.status === "Down" ? -1 : 0,
         fill: statusColor(t.status),
+        status: t.status,
+        index,
+        tickId: t.id,
+        uniqueKey: `${formatTime(t.createdAt, selectedPeriod)}-${index}`,
       })),
-    [ticks]
+    [ticks, selectedPeriod]
   );
+
+  const getXAxisInterval = (data: any[], period: TimePeriod) => {
+    if (period === "24h") {
+      return data.length > 24 ? Math.floor(data.length / 12) : "preserveStart";
+    } else if (period === "7d") {
+      const uniqueDates = new Set(data.map(d => d.time));
+      const numUniqueDates = uniqueDates.size;
+      if (numUniqueDates <= 7) {
+        const ticksPerDay = Math.ceil(data.length / numUniqueDates);
+        return Math.max(1, Math.floor(ticksPerDay / 2));
+      }
+      return Math.max(1, Math.floor(data.length / 7));
+    } else {
+      const uniqueDates = new Set(data.map(d => d.time));
+      const numUniqueDates = uniqueDates.size;
+      if (numUniqueDates <= 15) {
+        const ticksPerDay = Math.ceil(data.length / numUniqueDates);
+        return Math.max(1, Math.floor(ticksPerDay / 2));
+      }
+      return Math.max(1, Math.floor(data.length / 6));
+    }
+  };
+
+  const getBarSize = (dataLength: number, period: TimePeriod) => {
+    if (period === "24h") {
+      return Math.max(2, Math.min(8, 400 / dataLength));
+    } else if (period === "7d") {
+      return Math.max(1, Math.min(6, 600 / dataLength));
+    } else {
+      return Math.max(1, Math.min(4, 800 / dataLength));
+    }
+  };
+
+  const getTickFormatter = (data: any[], period: TimePeriod) => {
+    if (period === "24h") return undefined;
+    
+    // For 7d and 30d, we want to show date labels at smart intervals
+    // but not hide all duplicates - just space them out nicely
+    const seenDates = new Map<string, number>();
+    
+    return (value: string, index: number) => {
+      if (seenDates.has(value)) {
+        // If we've seen this date before, only show it occasionally to avoid crowding
+        const firstIndex = seenDates.get(value)!;
+        const spacing = period === "7d" ? 6 : 12; // Show every 6th for 7d, every 12th for 30d
+        if (index - firstIndex < spacing) {
+          return "";
+        }
+      } else {
+        seenDates.set(value, index);
+      }
+      return value;
+    };
+  };
 
   if (loading) {
     return (
@@ -197,7 +290,7 @@ export default function WebsiteDetailPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div className="bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm">
-            <div className="text-gray-400 text-sm">Uptime (24h)</div>
+            <div className="text-gray-400 text-sm">Uptime ({TIME_PERIODS[selectedPeriod].label})</div>
             <div className="text-3xl font-semibold text-white">{metrics.upPct}%</div>
           </div>
           <div className="bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm">
@@ -210,8 +303,8 @@ export default function WebsiteDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3 relative overflow-hidden group bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm transition-all duration-500 hover:border-green-500/40">
+        <div className={`grid gap-8 ${selectedPeriod === "24h" ? "grid-cols-1 lg:grid-cols-5" : "grid-cols-1"}`}>
+          <div className={`${selectedPeriod === "24h" ? "lg:col-span-3" : ""} relative overflow-hidden group bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm transition-all duration-500 hover:border-green-500/40`}>
             <motion.div
               className="absolute inset-0 opacity-50"
               animate={{
@@ -226,18 +319,33 @@ export default function WebsiteDetailPage() {
               transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
             />
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-white">Response Time (last 24h)</h2>
+              <h2 className="text-xl font-semibold text-white">Response Time (last {TIME_PERIODS[selectedPeriod].label})</h2>
               <div className="text-gray-500 text-sm">ms</div>
             </div>
-            <div className="h-72">
+            <div className={`${selectedPeriod === "24h" ? "h-72" : "h-80"}`}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={lineData} margin={{ top: 10, right: 20, bottom: 10, left: 0 }}>
+                <LineChart data={lineData} margin={{ top: 10, right: 20, bottom: selectedPeriod === "30d" ? 60 : selectedPeriod === "7d" ? 30 : 10, left: selectedPeriod === "30d" ? 25 : selectedPeriod === "7d" ? 15 : 0 }}>
                   <CartesianGrid stroke="#1f2937" strokeDasharray="3 3" />
-                  <XAxis dataKey="time" tick={{ fill: "#9ca3af", fontSize: 12 }} />
+                  <XAxis 
+                    dataKey="uniqueKey"
+                    tick={{ fill: "#9ca3af", fontSize: selectedPeriod === "24h" ? 12 : 11 }} 
+                    interval={getXAxisInterval(lineData, selectedPeriod)}
+                    axisLine={{ stroke: "#374151" }}
+                    tickLine={{ stroke: "#374151" }}
+                    angle={selectedPeriod === "30d" ? -45 : 0}
+                    textAnchor={selectedPeriod === "30d" ? "end" : "middle"}
+                    height={selectedPeriod === "30d" ? 60 : 30}
+                    tickFormatter={(value, index) => {
+                      const timeLabel = value.split('-')[0];
+                      const formatter = getTickFormatter(lineData, selectedPeriod);
+                      return formatter ? formatter(timeLabel, index) : timeLabel;
+                    }}
+                  />
                   <YAxis tick={{ fill: "#9ca3af", fontSize: 12 }} />
                   <Tooltip
-                    content={<LineTooltip />}
+                    content={<LineTooltip period={selectedPeriod} />}
                     cursor={{ stroke: "#22c55e", strokeWidth: 1, strokeDasharray: "3 3", opacity: 0.6 }}
+                    allowEscapeViewBox={{ x: false, y: false }}
                   />
                   <Line type="monotone" dataKey="ms" stroke="#22c55e" strokeWidth={2} dot={false} />
                 </LineChart>
@@ -245,7 +353,7 @@ export default function WebsiteDetailPage() {
             </div>
           </div>
 
-          <div className="lg:col-span-2 relative overflow-hidden group bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm transition-all duration-500 hover:border-green-500/40">
+          <div className={`${selectedPeriod === "24h" ? "lg:col-span-2" : ""} relative overflow-hidden group bg-black/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm transition-all duration-500 hover:border-green-500/40`}>
             <motion.div
               className="absolute inset-0 opacity-50"
               animate={{
@@ -259,21 +367,44 @@ export default function WebsiteDetailPage() {
               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             />
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-white">Status Timeline (last 24h)</h2>
+              <h2 className="text-xl font-semibold text-white">Status Timeline (last {TIME_PERIODS[selectedPeriod].label})</h2>
               <div className="text-gray-500 text-sm">Up/Down</div>
             </div>
-            <div className="h-72">
+            <div className={`${selectedPeriod === "24h" ? "h-72" : "h-80"}`}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={statusData} margin={{ top: 10, right: 20, bottom: 10, left: 0 }}>
-                  <XAxis dataKey="time" tick={{ fill: "#9ca3af", fontSize: 12 }} />
+                <BarChart 
+                  data={statusData} 
+                  margin={{ top: 10, right: 20, bottom: selectedPeriod === "30d" ? 60 : selectedPeriod === "7d" ? 30 : 10, left: selectedPeriod === "30d" ? 25 : selectedPeriod === "7d" ? 15 : 0 }}
+                  barCategoryGap={1}
+                >
+                  <XAxis 
+                    dataKey="uniqueKey"
+                    tick={{ fill: "#9ca3af", fontSize: selectedPeriod === "24h" ? 12 : 11 }}
+                    interval={getXAxisInterval(statusData, selectedPeriod)}
+                    axisLine={{ stroke: "#374151" }}
+                    tickLine={{ stroke: "#374151" }}
+                    angle={selectedPeriod === "30d" ? -45 : 0}
+                    textAnchor={selectedPeriod === "30d" ? "end" : "middle"}
+                    height={selectedPeriod === "30d" ? 60 : 30}
+                    tickFormatter={(value, index) => {
+                      // Extract the time part from uniqueKey (format: "time-index")
+                      const timeLabel = value.split('-')[0];
+                      const formatter = getTickFormatter(statusData, selectedPeriod);
+                      return formatter ? formatter(timeLabel, index) : timeLabel;
+                    }}
+                  />
                   <YAxis hide />
                   <Tooltip
-                    content={<StatusTooltip />}
+                    content={<StatusTooltip period={selectedPeriod} />}
                     cursor={{ fill: "rgba(34, 197, 94, 0.08)" }}
+                    allowEscapeViewBox={{ x: false, y: false }}
                   />
-                  <Bar dataKey="value">
+                  <Bar 
+                    dataKey="value" 
+                    maxBarSize={getBarSize(statusData.length, selectedPeriod)}
+                  >
                     {statusData.map((entry, idx) => (
-                      <Cell key={`cell-${idx}`} fill={entry.fill} />
+                      <Cell key={`cell-${entry.tickId}`} fill={entry.fill} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -283,9 +414,19 @@ export default function WebsiteDetailPage() {
         </div>
 
         <div className="mt-8 flex items-center gap-3 justify-center">
-          <button className="px-4 py-2 rounded-full border border-green-500/30 text-white bg-green-600/20 shadow-[0_0_20px_rgba(34,197,94,0.15)]">24h</button>
-          <button disabled className="px-4 py-2 rounded-full border border-gray-800 text-gray-500 cursor-not-allowed">7d (soon)</button>
-          <button disabled className="px-4 py-2 rounded-full border border-gray-800 text-gray-500 cursor-not-allowed">30d (soon)</button>
+          {(Object.keys(TIME_PERIODS) as TimePeriod[]).map((period) => (
+            <button
+              key={period}
+              onClick={() => handlePeriodChange(period)}
+              className={`px-4 py-2 rounded-full border transition-all duration-200 ${
+                selectedPeriod === period
+                  ? "border-green-500/30 text-white bg-green-600/20 shadow-[0_0_20px_rgba(34,197,94,0.15)]"
+                  : "border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-300"
+              }`}
+            >
+              {TIME_PERIODS[period].label}
+            </button>
+          ))}
         </div>
       </div>
     </div>
