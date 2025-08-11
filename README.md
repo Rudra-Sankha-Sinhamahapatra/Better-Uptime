@@ -11,10 +11,14 @@ https://github.com/user-attachments/assets/b115c62a-99b5-4f0a-b3d3-3059a30492d8
 - Real-time website monitoring
 - Response time tracking
 - Beautiful dashboard interface
-- Visual graphs per website (last 24h):
+- Visual graphs per website with multiple time periods (24h, 7d, 30d):
   - Response Time line chart (Avg, P95, hover details)
   - Status Timeline (Up/Down) bar chart
+  - Time period selector with dropdown
+  - Individual data point tooltips for precise monitoring
+  - Dynamic chart layouts (column-wise for extended periods)
   - On-brand glass/green gradient tooltips and hover cursors
+  - Animated green light effects on metric cards
 - Distributed monitoring system using message queues
 - Smart notification system:
   - Email notifications for website downtime and recovery
