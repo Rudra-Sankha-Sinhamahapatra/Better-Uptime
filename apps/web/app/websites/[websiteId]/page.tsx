@@ -22,8 +22,6 @@ function formatTime(ts: string, period: TimePeriod): string {
   
   if (period === "24h") {
     return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  } else if (period === "7d") {
-    return d.toLocaleDateString([], { month: "short", day: "numeric" });
   } else {
     return d.toLocaleDateString([], { month: "short", day: "numeric" });
   }
