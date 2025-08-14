@@ -6,44 +6,46 @@ import { useEffect, useState } from "react"
 import { WebsitesGradient } from "./ui/WebsitesGradient";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { authClient } from "@/lib/auth-client";
 import { AddWebsite } from "./AddWebsite";
 import { NoWebsites } from "./NoWebsites";
+import { useSession } from "@/context/session-context";
 
 export default function Websites() {
     const [websites, setWebsites] = useState<Website[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { session } = useSession(); 
 
+   
     const fetchWebsites = async () => {
+        if (!session) {
+            setLoading(false);
+            return;
+        }
+        
         try {
-            const session = await authClient.getSession();
-
             const response = await fetch(`${config.backendUrl}/website`, {
                 method: "GET",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.data?.session.token}`,
-                },
+                    "Authorization": `Bearer ${session.session?.token}`,
+                    "Content-Type": "application/json"
+                }
             });
-            if(!response.ok) {
-                console.log(`Failed to fetch websites, status: ${response.status}`);
-                return;
+
+            if (response.ok) {
+                const data = await response.json();
+                setWebsites(data);
             }
-            const data = await response.json();
-            setWebsites(data);
-            setLoading(false);
         } catch (error) {
-            console.error('Error fetching websites:', error);
+            console.error("Error fetching websites:", error);
+        } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
         fetchWebsites();
-        const interval = setInterval(fetchWebsites, 30000);
-        return () => clearInterval(interval);
-    }, []);
+    }, [session]);
 
     if (loading) {
         return (

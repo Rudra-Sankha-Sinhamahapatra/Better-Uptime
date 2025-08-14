@@ -5,6 +5,11 @@ type SessionUser = {
     image: string | null;
 }
 
+type SessionData = {
+ token: string;
+};
+
 export type Session = {
-    user: SessionUser
+    user: SessionUser,
+    session: SessionData
 }

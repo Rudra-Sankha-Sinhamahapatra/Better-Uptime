@@ -1,5 +1,5 @@
 "use client";
-import { authClient } from "@/lib/auth-client";
+import { useSession } from "@/context/session-context";
 import { AddWebsiteProps } from "@/types/website";
 import { config } from "@/utils/config";
 import { AnimatePresence, motion } from "framer-motion";
@@ -12,17 +12,21 @@ export const AddWebsite = ({ onWebsiteAdded }: AddWebsiteProps) => {
     const [name, setName] = useState("");
     const [url, setUrl] = useState("");
     const [loading, setLoading] = useState(false);
+    const { session } = useSession();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const session = await authClient.getSession();
+            if (!session?.session?.token) {
+                throw new Error("No session token");
+            }
+
             const response = await fetch(`${config.backendUrl}/website`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${session.data?.session.token}`,
+                    "Authorization": `Bearer ${session.session.token}`,
                 },
                 body: JSON.stringify({ name, url }),
             });

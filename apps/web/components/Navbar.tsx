@@ -8,10 +8,12 @@ import { NavbarGradient } from "./ui/NavbarGradient";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { motion } from "framer-motion";
+import { useSession } from "@/context/session-context";
 
 export const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+    const { refreshSession } = useSession();
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -19,10 +21,11 @@ export const Navbar = () => {
 
     const handleSignOut = async () => {
         await authClient.signOut();
+        await refreshSession(); 
         setIsProfileDropdownOpen(false);
         window.location.replace("/signin");
     };
-
+    
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm border-b border-white/10">
             <NavbarGradient />

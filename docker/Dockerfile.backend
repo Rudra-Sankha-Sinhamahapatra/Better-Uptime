@@ -1,0 +1,32 @@
+# Stage 1 — Builder
+FROM oven/bun:1 AS builder
+
+WORKDIR /usr/src/app
+
+# Install OpenSSL for Prisma (needed at build time)
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
+
+COPY bun.lock package.json turbo.json ./
+
+COPY packages/db ./packages/db
+COPY apps/api ./apps/api
+
+RUN bun install 
+
+# Generate Prisma client
+RUN bun run prisma:generate
+
+# Stage 2 — Runtime (smaller base)
+FROM oven/bun:1-slim
+
+WORKDIR /usr/src/app
+
+# Install only OpenSSL for runtime (smaller footprint)
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/src/app /usr/src/app
+
+EXPOSE 8082
+
+CMD ["bun", "run", "start:backend"]
