@@ -225,6 +225,11 @@ export default function WebsiteDetailPage() {
   );
 
   const fetchData = async (period: TimePeriod = selectedPeriod) => {
+    if (sessionLoading) {
+      setLoading(true);
+      return;
+    }
+    
     if (!session?.session?.token) {
       setError("No session token");
       setLoading(false);
