@@ -1,7 +1,7 @@
 import type { Channel, Message } from "amqplib";
 import { checkWebsite } from "../monitoring";
 import prisma, { WebsiteStatus } from "@repo/db/client";
-import {  queueContactFormEmail } from "../services/emailQueue";
+import { queueContactFormEmail } from "../services/emailQueue";
 import { queueDbOperation } from "../services/dbQueue";
 import type { Region } from "../types/monitoring";
 
@@ -11,7 +11,7 @@ export const processMessage = async (
     defaultRegion: Region,
 ): Promise<void> => {
     try {
-       await new Promise(resolve => setTimeout(resolve, 100)); 
+        await new Promise(resolve => setTimeout(resolve, 100));
 
         const data = JSON.parse(message.content.toString());
 
@@ -36,7 +36,10 @@ export const processMessage = async (
             url: data.url,
         });
 
+        console.log("🔄 About to call checkWebsite for:", data.url);
         const result = await checkWebsite(data.url);
+
+        console.log("🔄 checkWebsite returned:", result);
 
         if (!result) {
             console.error("No result from checkWebsite", data.url);
@@ -44,15 +47,23 @@ export const processMessage = async (
             return;
         }
 
-        await queueDbOperation({
-            websiteId: data.websiteId,
-            responseTimeMs: result.responseTimeMs,
-            status: result.status,
-            regionId: defaultRegion.id,
-            userEmail: data.userEmail,
-            url: data.url,
-            previousStatus: data.previousStatus as WebsiteStatus ||  WebsiteStatus.Unknown
-        });
+        console.log("🔄 About to queue DB operation");
+
+        try {
+            await queueDbOperation({
+                websiteId: data.websiteId,
+                responseTimeMs: result.responseTimeMs,
+                status: result.status,
+                regionId: defaultRegion.id,
+                userEmail: data.userEmail,
+                url: data.url,
+                previousStatus: data.previousStatus as WebsiteStatus || WebsiteStatus.Unknown
+            });
+            console.log("✅ DB operation queued successfully");
+        } catch (error: any) {
+            console.error("❌ DB operation failed:", error.message);
+            console.error("❌ Error details:", error);
+        }
 
         console.log(`Check completed for ${data.url}:`, result);
         channel.ack(message);
