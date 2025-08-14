@@ -11,7 +11,8 @@
     "@types/bun": "latest",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.18",
-    "@types/express": "^5.0.2"
+    "@types/express": "^5.0.2",
+    "@types/dotenv": "^8.2.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0",
@@ -22,6 +23,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "node-cron": "^4.1.0"
   }
