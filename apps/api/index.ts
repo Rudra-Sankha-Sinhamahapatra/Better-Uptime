@@ -34,6 +34,12 @@ app.get("/website/:websiteId", getWebsiteById);
 
 app.post("/contact", submitContactForm);
 
+app.get("/",(req,res) => {
+  res.status(200).json({
+    message:"Healthy Server"
+  })
+});
+
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 process.on("uncaughtException",  (error)=> {
