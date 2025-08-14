@@ -7,6 +7,7 @@ _.log
 npm-debug.log_
 yarn-debug.log*
 yarn-error.log*
+deploy.txt
 lerna-debug.log*
 .pnpm-debug.log*
 
