@@ -18,15 +18,23 @@ const REDIS_URL = config.redis.redisURL;
 if (!REDIS_URL) {
     throw new Error("Redis URL is not defined in the configuration");
 }
+
+const redisConfig = REDIS_URL.startsWith('rediss://') ? {
+    tls: {
+        rejectUnauthorized: false, // Ignore SSL certificate errors
+    }
+} : {};
+
 const dbQueue = new Queue<DbJob>('db-operations', REDIS_URL, {
     defaultJobOptions: {
         attempts: 3,
         removeOnComplete: 3,
         removeOnFail: 10,
     },
+    redis: redisConfig
 });
 
-dbQueue.process(10,async (job) => {
+dbQueue.process('process-website-check',10,async (job) => {
     const { websiteId, responseTimeMs, status, regionId, userEmail, url, previousStatus } = job.data;
    console.log(`Processing DB job for website ${websiteId} with status ${status}`);
     try {
@@ -50,7 +58,16 @@ if(status === WebsiteStatus.Down && previousStatus === WebsiteStatus.Up) {
 });
 
 export const queueDbOperation = async (data: DbJob) => {
-    return dbQueue.add(data);
+     console.log("🔄 [queueDbOperation] Starting to queue:", data.websiteId);
+    
+    try {
+        const job = await dbQueue.add('process-website-check', data);
+        console.log("✅ [queueDbOperation] Job added to queue:", job.id);
+        return job;
+    } catch (error:any) {
+        console.error("❌ [queueDbOperation] Failed to add job:", error.message);
+        throw error;
+    }
 }
 
 export const closeDbQueue = async () => {
