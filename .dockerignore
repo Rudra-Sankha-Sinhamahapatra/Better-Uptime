@@ -2,3 +2,6 @@ nodemodules
 dist
 /*deploy.txt
 deploy.txt
+./deploy.txt
+/**/deploy.txt
+./**/deploy.txt
