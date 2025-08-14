@@ -16,6 +16,17 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+     "web#build": {
+      "dependsOn": ["^build"],
+      "env": [
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "NEXT_PUBLIC_BACKEND_URL",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET"
+      ],
+      "outputs": [".next/**", "!.next/cache/**"]
     }
   }
 }

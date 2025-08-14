@@ -1,9 +1,8 @@
 "use client"
 import { useState, useEffect } from "react";
-import { authClient } from "@/lib/auth-client";
 import { config } from "@/utils/config";
-import { SessionUser } from "@/types/contact";
 import { queryTypes, pageContent } from "@/utils/data/contactData";
+import { useSession } from "@/context/session-context";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -15,26 +14,18 @@ export default function ContactForm() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
-  const [user, setUser] = useState<SessionUser | null>(null);
+  const { session } = useSession();
 
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const session = await authClient.getSession();
-        if (session.data?.session) {
-          setUser(session.data.user);
-          setFormData(prev => ({
-            ...prev,
-            name: session.data.user.name || "",
-            email: session.data.user.email || ""
-          }));
-        }
-      } catch (error) {
-        console.log("User not logged in");
-      }
-    };
-    checkUser();
-  }, []);
+    if (session?.user) {
+      setFormData(prev => ({
+        ...prev,
+        name: session.user.name || "",
+        email: session.user.email || ""
+      }));
+    }
+  }, [session]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,13 +33,16 @@ export default function ContactForm() {
     setError("");
 
     try {
-      const session = await authClient.getSession();
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
 
-      if (session.data?.session) {
-        headers["Authorization"] = `Bearer ${session.data.session.token}`;
+      if(!session) {
+        console.log("No session")
+      }
+
+      if (session?.session?.token) {
+        headers["Authorization"] = `Bearer ${session.session.token}`;
       }
 
       const response = await fetch(`${config.backendUrl}/contact`, {
@@ -64,8 +58,8 @@ export default function ContactForm() {
 
       setSubmitted(true);
       setFormData({
-        name: user?.name || "",
-        email: user?.email || "",
+        name: session?.user?.name || "",
+        email: session?.user?.email || "",
         queryType: queryTypes[0],
         query: ""
       });
@@ -88,10 +82,10 @@ export default function ContactForm() {
     <div className="bg-gradient-to-br from-green-500/20 via-transparent to-green-500/10 rounded-2xl p-8 h-fit border border-gray-800/50 backdrop-blur-sm relative">
       <h2 className="text-2xl font-semibold mb-6 text-white">{pageContent.formTitle}</h2>
       
-      {user && (
+      {session?.user && (
         <div className="mb-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
           <p className="text-sm text-green-400">
-            {pageContent.messages.loggedIn} {user.name || user.email}
+            {pageContent.messages.loggedIn} {session?.user.name || session?.user.email}
           </p>
         </div>
       )}

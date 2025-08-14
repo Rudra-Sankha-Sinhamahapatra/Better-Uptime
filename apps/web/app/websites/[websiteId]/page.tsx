@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { config } from "@/utils/config";
-import { authClient } from "@/lib/auth-client";
 import type { Website } from "@/types/website";
 import type { WebsiteTick } from "@/types/tick";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Cell } from "recharts";
 import { WebsitesGradient } from "@/components/ui/WebsitesGradient";
 import { motion } from "framer-motion";
 import type { TimePeriod, StatusTooltipProps, LineTooltipProps } from "@/types/websiteStatus";
+import { useSession } from "@/context/session-context";
 
 const TIME_PERIODS: Record<TimePeriod, { hours: number; label: string }> = {
   "24h": { hours: 24, label: "24h" },
@@ -177,57 +177,13 @@ function CustomSelect({
 export default function WebsiteDetailPage() {
   const params = useParams<{ websiteId: string }>();
   const websiteId = params.websiteId;
+  const { session, loading: sessionLoading } = useSession();
 
   const [loading, setLoading] = useState(true);
   const [website, setWebsite] = useState<Website | null>(null);
   const [ticks, setTicks] = useState<WebsiteTick[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("24h");
-
-  const fetchData = async (period: TimePeriod = selectedPeriod) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const session = await authClient.getSession();
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (session.data?.session?.token) {
-        headers.Authorization = `Bearer ${session.data.session.token}`;
-      }
-
-      const hours = TIME_PERIODS[period].hours;
-      const [websiteRes, ticksRes] = await Promise.all([
-        fetch(`${config.backendUrl}/website/${websiteId}`, { headers }),
-        fetch(`${config.backendUrl}/website/${websiteId}/ticks?hours=${hours}`, { headers }),
-      ]);
-
-      if (!websiteRes.ok) throw new Error("Failed to load website");
-      if (!ticksRes.ok) throw new Error("Failed to load ticks");
-
-      const websiteData = await websiteRes.json();
-      const ticksData = await ticksRes.json();
-
-      setWebsite(websiteData);
-      setTicks(ticksData.ticks || []);
-    } catch (e: unknown) {
-      setError((e as Error).message || "Failed to load data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (websiteId) {
-      fetchData(selectedPeriod);
-      if (selectedPeriod === "24h") {
-        const interval = setInterval(() => fetchData(selectedPeriod), 60_000);
-        return () => clearInterval(interval);
-      }
-    }
-  }, [websiteId, selectedPeriod]);
-
-  const handlePeriodChange = (period: TimePeriod) => {
-    setSelectedPeriod(period);
-  };
 
   const metrics = useMemo(() => {
     if (!ticks.length) return { avgMs: 0, p95Ms: 0, upPct: 0 };
@@ -267,6 +223,99 @@ export default function WebsiteDetailPage() {
       })),
     [ticks, selectedPeriod]
   );
+
+  const fetchData = async (period: TimePeriod = selectedPeriod) => {
+    if (sessionLoading) {
+      setLoading(true);
+      return;
+    }
+    
+    if (!session?.session?.token) {
+      setError("No session token");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (session.session?.token) {
+        headers.Authorization = `Bearer ${session.session.token}`;
+      }
+
+      const hours = TIME_PERIODS[period].hours;
+      const [websiteRes, ticksRes] = await Promise.all([
+        fetch(`${config.backendUrl}/website/${websiteId}`, { headers }),
+        fetch(`${config.backendUrl}/website/${websiteId}/ticks?hours=${hours}`, { headers }),
+      ]);
+
+      if (!websiteRes.ok) throw new Error("Failed to load website");
+      if (!ticksRes.ok) throw new Error("Failed to load ticks");
+
+      const websiteData = await websiteRes.json();
+      const ticksData = await ticksRes.json();
+
+      setWebsite(websiteData);
+      setTicks(ticksData.ticks || []);
+    } catch (e: unknown) {
+      setError((e as Error).message || "Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (websiteId && !sessionLoading && session) {
+      fetchData(selectedPeriod);
+      if (selectedPeriod === "24h") {
+        const interval = setInterval(() => fetchData(selectedPeriod), 60_000);
+        return () => clearInterval(interval);
+      }
+    }
+  }, [websiteId, selectedPeriod, session, sessionLoading]);
+
+  const handlePeriodChange = (period: TimePeriod) => {
+    setSelectedPeriod(period);
+  };
+
+  if (sessionLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-sm">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 border-4 border-green-500/20 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-green-500 rounded-full animate-spin border-t-transparent"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen pt-24 px-6 text-center text-red-400">
+        Please sign in to view this page
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-sm">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 border-4 border-green-500/20 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-green-500 rounded-full animate-spin border-t-transparent"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !website) {
+    return (
+      <div className="min-h-screen pt-24 px-6 text-center text-red-400">
+        {error || "Website not found"}
+      </div>
+    );
+  }
 
   const getXAxisInterval = (data: any[], period: TimePeriod) => {
     if (period === "24h") {
@@ -321,25 +370,6 @@ export default function WebsiteDetailPage() {
       return value;
     };
   };
-
-  if (loading) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/20 backdrop-blur-sm">
-        <div className="relative w-16 h-16">
-          <div className="absolute inset-0 border-4 border-green-500/20 rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-green-500 rounded-full animate-spin border-t-transparent"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !website) {
-    return (
-      <div className="min-h-screen pt-24 px-6 text-center text-red-400">
-        {error || "Website not found"}
-      </div>
-    );
-  }
 
   return (
     <div className="relative min-h-screen bg-black">

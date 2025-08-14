@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "bunx prisma generate --schema=../../packages/db/prisma/schema.prisma"
   },
   "dependencies": {
     "better-auth": "^1.2.8",
