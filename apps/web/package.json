@@ -10,6 +10,7 @@
     "postinstall": "bunx prisma generate --schema=../../packages/db/prisma/schema.prisma"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.5.0",
     "better-auth": "^1.2.8",
     "framer-motion": "^12.16.0",
     "lucide-react": "^0.513.0",
