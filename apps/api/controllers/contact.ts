@@ -6,13 +6,11 @@ export const submitContactForm = async (req: Request, res: Response) => {
   try {
     const { name, email, queryType, query } = req.body;
 
-    // Validate required fields
     if (!name || !email || !queryType || !query) {
       res.status(400).json({ error: "All fields are required" });
       return;
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       res.status(400).json({ error: "Invalid email format" });
@@ -21,7 +19,6 @@ export const submitContactForm = async (req: Request, res: Response) => {
 
     let userSession = null;
     
-    // Check if user is logged in
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       try {
@@ -39,12 +36,10 @@ export const submitContactForm = async (req: Request, res: Response) => {
           };
         }
       } catch (error) {
-        // If session validation fails, continue as anonymous user
         console.log("Session validation failed, treating as anonymous user");
       }
     }
 
-    // Create contact form message for queue
     const contactMessage = {
       type: 'contact_form' as const,
       data: {
@@ -60,7 +55,6 @@ export const submitContactForm = async (req: Request, res: Response) => {
       }
     };
 
-    // Send to queue for email processing
     await publishToQueue(contactMessage);
 
     console.log("Contact form submitted:", {
