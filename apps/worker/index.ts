@@ -6,6 +6,8 @@ import type { AmqpChannel, AmqpConnection } from "./types/amqp";
 import { closeEmailQueue } from "./services/emailQueue";
 import { closeDbQueue } from "./services/dbQueue";
 import { processMessage } from "./lib/processMessage";
+import { startDbQueueProcessor } from "./services/dbQueue";
+import { startEmailQueueProcessor } from "./services/emailQueue";
 
 let connection: AmqpConnection | null = null;
 let channel: AmqpChannel | null = null;
@@ -67,6 +69,9 @@ const startWorker = async () => {
         }, {
             noAck: false
         });
+
+        startDbQueueProcessor();
+        startEmailQueueProcessor();
 
         process.on("SIGINT", async () => {
             console.log("\nStarting graceful shutdown...");

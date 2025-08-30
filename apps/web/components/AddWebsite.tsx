@@ -39,8 +39,15 @@ export const AddWebsite = ({ onWebsiteAdded }: AddWebsiteProps) => {
 
             if (onWebsiteAdded) {
                 setTimeout(() => {
-                    onWebsiteAdded();
-                }, 2000);
+                    try {
+                    setLoading(true);
+                    onWebsiteAdded()
+                    } catch {
+                      console.log("Loading faliled after website adding");
+                    } finally {
+                        setLoading(false);
+                    }
+                }, 4000);
             }
         } catch (error) {
             console.error("Error adding website:", error);
