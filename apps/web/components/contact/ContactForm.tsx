@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { config } from "@/utils/config";
 import { queryTypes, pageContent } from "@/utils/data/contactData";
 import { useSession } from "@/context/session-context";
+import { Loading } from "../Loading";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -77,6 +78,10 @@ export default function ContactForm() {
       [e.target.name]: e.target.value
     });
   };
+
+     if (loading) {
+          return <Loading/>
+      }
 
   return (
     <div className="bg-gradient-to-br from-green-500/20 via-transparent to-green-500/10 rounded-2xl p-8 h-fit border border-gray-800/50 backdrop-blur-sm relative">

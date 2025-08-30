@@ -5,6 +5,7 @@ import { config } from "@/utils/config";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import React, { useState } from "react";
+import { Loading } from "./Loading";
 
 
 export const AddWebsite = ({ onWebsiteAdded }: AddWebsiteProps) => {
@@ -12,7 +13,7 @@ export const AddWebsite = ({ onWebsiteAdded }: AddWebsiteProps) => {
     const [name, setName] = useState("");
     const [url, setUrl] = useState("");
     const [loading, setLoading] = useState(false);
-    const { session } = useSession();
+    const { session, loading: sessionLoading } = useSession();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,26 +36,25 @@ export const AddWebsite = ({ onWebsiteAdded }: AddWebsiteProps) => {
 
             setName("");
             setUrl("");
+            await new Promise((resolve) => setTimeout(resolve, 2000));
             setIsModalOpen(false);
 
             if (onWebsiteAdded) {
-                setTimeout(() => {
-                    try {
-                    setLoading(true);
-                    onWebsiteAdded()
-                    } catch {
-                      console.log("Loading faliled after website adding");
-                    } finally {
-                        setLoading(false);
-                    }
-                }, 4000);
+                setLoading(true);
+                await onWebsiteAdded();
+                setLoading(false);
             }
+
         } catch (error) {
             console.error("Error adding website:", error);
         } finally {
             setLoading(false);
         }
     };
+
+    if (loading || sessionLoading) {
+        return <Loading />
+    }
 
     return (
         <>
