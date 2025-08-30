@@ -11,5 +11,5 @@ export type Website = {
   }
 
   export interface AddWebsiteProps {
-    onWebsiteAdded?: () => void;
+    onWebsiteAdded?: () => Promise<void>;
 }
