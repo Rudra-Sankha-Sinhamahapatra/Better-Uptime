@@ -11,6 +11,7 @@
     "@types/axios": "^0.14.4",
     "@types/bun": "latest",
     "@types/dotenv": "^8.2.3",
+    "@types/ioredis": "^5.0.0",
     "@types/nodemailer": "^6.4.17"
   },
   "peerDependencies": {
@@ -22,6 +23,7 @@
     "axios": "^1.9.0",
     "bull": "^4.16.5",
     "dotenv": "^16.5.0",
+    "ioredis": "^5.7.0",
     "nodemailer": "^7.0.3",
     "redis": "^5.5.6"
   }

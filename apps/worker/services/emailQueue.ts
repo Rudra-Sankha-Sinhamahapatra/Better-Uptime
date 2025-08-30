@@ -1,57 +1,47 @@
-import Queue  from "bull";
 import { config } from "../config";
 import { sendEmail } from "./nodemailer";
 import type { ContactFormEmailData } from "../types/contact";
+import type { EmailJob } from "../types/queueJobs";
+import { emailConsumer as consumer, producer } from "../lib/redis";
 
-interface EmailJob {
-    to: string;
-    subject: string;
-    text: string;
-    websiteUrl?: string;
-    status: 'down' | 'up' | 'contact'
-    retries?: number
-}
-
-
-const emailQueue = new Queue<EmailJob>('email-notifications',config.redis.redisURL, {
-    defaultJobOptions: {
-        attempts: 3,
-        backoff: {
-            type: 'exponential',
-            delay: 1000
-        },
-        removeOnComplete: true,
-        removeOnFail: false
-    }
-})
-
-emailQueue.process(10,async (job) => {
-    const { to,subject,text } = job.data;
-
-    try {
-        await sendEmail(to,subject,text);
-        console.log(`Email sent successfully to ${to}`);
-    } catch (error) {
-        console.error(`Failed to send email to ${to}:`, error);
-        throw error; 
-    }
-})
-
-emailQueue.on('failed', (job,error) => {
-    console.error(`Job ${job.id} failed after ${job.opts.attempts} attempts:`, error);
-})
+const QUEUE_NAME = 'email-notifications';
+const MAX_RETRIES = 2;
 
 export const queueEmail = async (emailData: EmailJob) => {
-    try {
-        const job = await emailQueue.add(emailData, {
-            priority: emailData.status === 'down' ? 1 : emailData.status === 'contact' ? 2 : 3
-        })
-        console.log(`Email job ${job.id} added to queue`);
-        return job;
-    } catch (error) {
-        console.error('Failed to add email to queue:', error);
-        throw error;
-    }
+    const jobWithRetries = {...emailData, retries: 0};
+    await producer.lpush(QUEUE_NAME, JSON.stringify(jobWithRetries));
+    console.log(`Email job added to queue for ${emailData.to}`);
+}
+
+export const startEmailQueueProcessor = async () => {
+        console.log("Starting simple Redis queue processor for email notifications");
+        while(true) {
+            try {
+                const result = await consumer.brpop(QUEUE_NAME, 0);
+                if(!result) continue;
+                const job = JSON.parse(result[1]) as EmailJob & { retries?: number };
+                job.retries = job.retries ?? 0;
+
+                const { to, subject, text } = job;
+            try {
+                await sendEmail(to, subject, text);
+                console.log(`Email sent successfully to ${to}`);
+            } catch (error) {
+                console.error(`Failed to send email to ${to}:`, error);
+                if (job.retries < MAX_RETRIES) {
+                    job.retries += 1;
+                    await new Promise(res => setTimeout(res,1000 * job.retries!));
+                    await producer.lpush(QUEUE_NAME, JSON.stringify(job));
+                    console.log(`Re-emailed successfully to ${to}, retry: ${job.retries}`);
+                } else {
+                    console.error(`Email job failed to send to : ${to} failed after ${MAX_RETRIES} retries. Dropping job.`);
+                }
+                continue; 
+            }
+            } catch (error) {
+            console.error("Error processing email job from Redis queue:", error);
+        }
+        }
 }
 
 export const queueDowntimeEmail = async (to: string, websiteUrl: string) => {
@@ -125,9 +115,10 @@ Please respond to: ${contactData.email}
 
 export const closeEmailQueue = async () => {
     try {
-        await emailQueue.close();
-        console.log('Email queue closed successfully');
+        await producer.quit();
+        await consumer.quit();
+        console.log('Email queue (Redis) closed successfully');
     } catch (error) {
-        console.error('Error closing email queue:', error);
+        console.error('Error closing email queue (Redis):', error);
     }
 };

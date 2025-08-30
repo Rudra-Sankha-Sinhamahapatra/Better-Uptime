@@ -1,6 +1,6 @@
 import type { Channel, Message } from "amqplib";
 import { checkWebsite } from "../monitoring";
-import prisma, { WebsiteStatus } from "@repo/db/client";
+import  { WebsiteStatus } from "@repo/db/client";
 import { queueContactFormEmail } from "../services/emailQueue";
 import { queueDbOperation } from "../services/dbQueue";
 import type { Region } from "../types/monitoring";
@@ -57,7 +57,7 @@ export const processMessage = async (
                 regionId: defaultRegion.id,
                 userEmail: data.userEmail,
                 url: data.url,
-                previousStatus: data.previousStatus as WebsiteStatus || WebsiteStatus.Unknown
+                previousStatus: data.previousStatus as WebsiteStatus || WebsiteStatus.Unknown,
             });
             console.log("✅ DB operation queued successfully");
         } catch (error: any) {
