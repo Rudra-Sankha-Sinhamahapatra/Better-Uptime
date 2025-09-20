@@ -21,16 +21,16 @@ export const Navbar = () => {
 
     const handleSignOut = async () => {
         await authClient.signOut();
-        await refreshSession(); 
+        await refreshSession();
         setIsProfileDropdownOpen(false);
         window.location.replace("/signin");
     };
-    
+
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm border-b border-white/10">
             <NavbarGradient />
             <div className="container mx-auto px-4 sm:px-6 py-4 relative">
-                {/* Mobile Layout - Completely separate structure */}
+
                 <div className="sm:hidden">
                     <div className="flex items-center justify-between w-full">
 
@@ -80,18 +80,26 @@ export const Navbar = () => {
                                                 >
                                                     <div className="p-3 border-b border-gray-800/50">
                                                         <div className="flex items-center gap-2">
-                                                            <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-800/50">
-                                                                <Image
-                                                                    src={session.user.image || '/default-avatar.png'}
-                                                                    alt="Profile"
-                                                                    width={32}
-                                                                    height={32}
-                                                                    className="object-cover"
-                                                                />
+                                                            <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-800/50 flex items-center justify-center bg-green-600 text-white font-bold">
+                                                                {session.user.image ? (
+                                                                    <Image
+                                                                        src={session.user.image}
+                                                                        alt="Profile"
+                                                                        width={32}
+                                                                        height={32}
+                                                                        className="object-cover w-full h-full"
+                                                                    />
+                                                                ) : (
+                                                                    <span className="text-sm">
+                                                                        {session.user.name?.[0] || session.user.email?.[0] || "?"}
+                                                                    </span>
+                                                                )}
                                                             </div>
-                                                            <div>
-                                                                <p className="text-white font-medium text-sm">{session.user.name}</p>
-                                                                <p className="text-gray-400 text-xs">{session.user.email}</p>
+
+                                                
+                                                            <div className="flex flex-col max-w-[120px]">
+                                                                <p className="text-white font-medium text-sm truncate">{session.user.name}</p>
+                                                                <p className="text-gray-400 text-xs truncate">{session.user.email}</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -112,7 +120,6 @@ export const Navbar = () => {
                                 </UserProfile>
                             </div>
 
-                            {/* Mobile Menu Button - Absolute right */}
                             <div className="absolute right-0 top-0">
                                 <button
                                     className="text-white p-2 bg-black/50 rounded-md hover:bg-black/70 transition-colors border border-gray-700/50"
@@ -137,9 +144,7 @@ export const Navbar = () => {
                     </div>
                 </div>
 
-                {/* Desktop/Tablet Layout - Medium+ screens */}
                 <div className="hidden sm:flex items-center justify-between">
-                    {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center gap-2">
                             <Image
@@ -153,7 +158,6 @@ export const Navbar = () => {
                         </Link>
                     </div>
 
-                    {/* Navigation */}
                     <div className="flex items-center gap-2 sm:gap-4 md:gap-4 lg:gap-6">
                         <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors">
                             Pricing
@@ -169,7 +173,6 @@ export const Navbar = () => {
                         </Link>
                     </div>
 
-                    {/* Auth */}
                     <div className="flex items-center gap-4">
                         <UserProfile>
                             {(session: Session | null) => !session ? (
@@ -210,18 +213,24 @@ export const Navbar = () => {
                                         >
                                             <div className="p-4 border-b border-gray-800/50">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-800/50">
-                                                        <Image
-                                                            src={session.user.image || '/default-avatar.png'}
-                                                            alt="Profile"
-                                                            width={48}
-                                                            height={48}
-                                                            className="object-cover"
-                                                        />
+                                                    <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-800/50 flex items-center justify-center bg-green-600 text-white font-bold">
+                                                        {session.user.image ? (
+                                                            <Image
+                                                                src={session.user.image}
+                                                                alt="Profile"
+                                                                width={48}
+                                                                height={48}
+                                                                className="object-cover w-full h-full"
+                                                            />
+                                                        ) : (
+                                                            <span className="text-lg">
+                                                                {session.user.name?.[0] || session.user.email?.[0] || "?"}
+                                                            </span>
+                                                        )}
                                                     </div>
-                                                    <div>
-                                                        <p className="text-white font-medium">{session.user.name}</p>
-                                                        <p className="text-gray-400 text-sm">{session.user.email}</p>
+                                                    <div className="flex flex-col max-w-[160px]">
+                                                        <p className="text-white font-medium text-sm truncate">{session.user.name}</p>
+                                                        <p className="text-gray-400 text-xs truncate">{session.user.email}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -243,11 +252,10 @@ export const Navbar = () => {
                     </div>
                 </div>
 
-                {/* Mobile Sidebar - Only for very small screens */}
                 {isMobileMenuOpen && (
                     <div className="sm:hidden mt-4 pb-4 border-t border-white/10 relative z-[9997]">
                         <div className="flex flex-col space-y-4 pt-4">
-                            {/* Navigation links only - profile is completely separate */}
+
                             <Link
                                 href="/pricing"
                                 className="text-gray-300 hover:text-white transition-colors py-2"

@@ -11,9 +11,15 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  if (request.nextUrl.pathname.startsWith("/signin")) {
+    if (sessionCookie) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/websites/:path*"],
+  matcher: ["/websites/:path*","/signin"],
 };

@@ -59,7 +59,7 @@ export default function Websites() {
             <WebsitesGradient />
 
             <div className="relative z-10 p-8 pt-16 max-w-7xl mx-auto">
-                <div className="mb-12 text-center">
+                <div className="my-12 text-center">
                     <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-white via-green-400 to-white bg-clip-text text-transparent">
                         Website Monitoring
                     </h1>

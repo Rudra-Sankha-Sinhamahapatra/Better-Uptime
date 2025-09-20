@@ -24,7 +24,9 @@
         "DIRECT_URL",
         "NEXT_PUBLIC_BACKEND_URL",
         "GOOGLE_CLIENT_ID",
-        "GOOGLE_CLIENT_SECRET"
+        "GOOGLE_CLIENT_SECRET",
+        "NEXT_PUBLIC_APP_URL",
+        "BETTER_AUTH_SECRET"
       ],
       "outputs": [".next/**", "!.next/cache/**"]
     }

@@ -5,6 +5,8 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SessionProvider } from "@/context/session-context";
 import { Analytics } from "@vercel/analytics/next"
+import { getServerSession } from "@/lib/auth-server";
+import { headers } from "next/headers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,21 +23,30 @@ export const metadata: Metadata = {
   description: "Website monitoring made simple",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const incomingHeaders = await headers();
+  const session = await getServerSession(incomingHeaders);
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-      <SessionProvider>
-        <Navbar />
-        <main className="pt-20 sm:pt-24 bg-black">
-          {children}
-        </main>
+        <SessionProvider initialSession={session ? {
+          ...session,
+          user: {
+            ...session.user,
+            image: session.user.image ?? ""
+          }
+        } : null}>
+          <Navbar />
+          <main className="pt-6 bg-black">
+            {children}
+          </main>
         <Footer/>
         </SessionProvider>
         <Analytics mode="production"/>
