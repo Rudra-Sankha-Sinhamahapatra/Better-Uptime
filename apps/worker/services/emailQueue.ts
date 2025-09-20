@@ -48,7 +48,7 @@ export const queueDowntimeEmail = async (to: string, websiteUrl: string) => {
     console.log(`Queueing downtime email for ${to} - ${websiteUrl}`);
     return queueEmail({
         to,
-        subject: `🔴 Website ${websiteUrl} is down`,
+        subject: `Website ${websiteUrl} is down`,
         text: `The website ${websiteUrl} is currently experiencing downtime. Our monitoring system detected this issue and we will notify you when it's back up.`,
         websiteUrl,
         status: 'down'
@@ -59,7 +59,7 @@ export const queueUptimeEmail = async (to: string, websiteUrl: string) => {
     console.log(`Queueing uptime email for ${to} - ${websiteUrl}`);
     return queueEmail({
         to,
-        subject: `✅ Website ${websiteUrl} is back up`,
+        subject: `Website ${websiteUrl} is back up`,
         text: `Good news! The website ${websiteUrl} is back online and responding normally.`,
         websiteUrl,
         status: 'up'
@@ -76,30 +76,30 @@ export const queueContactFormEmail = async (contactData: ContactFormEmailData) =
     console.log(`Queueing contact form email for ${contactData.email} - ${contactData.queryType}`);
     
     const userInfo = contactData.isLoggedIn 
-        ? `\n👤 Submitted Form Data:
+        ? `\n Submitted Form Data:
 - Name: ${contactData.name}
 - Email: ${contactData.email}
 
-🔐 Original Account Details:
+ Original Account Details:
 - User ID: ${contactData.userId}
 - Account Name: ${contactData.originalName || 'Not available'}
 - Account Email: ${contactData.originalEmail || 'Not available'}
 - Account Status: Logged in user`
-        : `\n👤 User Info:
+        : `\n User Info:
 - Name: ${contactData.name}
 - Email: ${contactData.email}
 - Account Status: Anonymous user`;
 
     const emailContent = `
-🎯 New Contact Form Submission
+ New Contact Form Submission
 
-📝 Query Type: ${contactData.queryType}
+ Query Type: ${contactData.queryType}
 
-💬 Message:
+ Message:
 ${contactData.query}
 ${userInfo}
 
-📅 Submitted: ${new Date(contactData.submittedAt).toLocaleString()}
+Submitted: ${new Date(contactData.submittedAt).toLocaleString()}
 
 ---
 Please respond to: ${contactData.email}

@@ -142,8 +142,8 @@ export const pageContent = {
     default: "Send Message"
   },
   messages: {
-    loggedIn: "✅ Logged in as",
-    success: "✅ Thank you! Your message has been sent successfully.",
+    loggedIn: "Logged in as",
+    success: "Thank you! Your message has been sent successfully.",
     error: "❌"
   }
 };

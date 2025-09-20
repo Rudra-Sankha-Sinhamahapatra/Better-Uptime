@@ -117,6 +117,22 @@ Website Details:
 
 export const getWebsiteById = async (req: Request, res: Response) => {
   try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    const token = authHeader.split(" ")[1];
+    const session = await prisma.session.findUnique({
+      where: { token },
+      include: { user: true }
+    });
+
+    if (!session) {
+      res.status(401).json({ error: "Invalid session" });
+      return;
+    }
+
     const { websiteId } = req.params;
     const website = await prisma.website.findUnique({
       where: { id: websiteId },
@@ -135,12 +151,18 @@ export const getWebsiteById = async (req: Request, res: Response) => {
       return;
     }
 
+    if (website.userId !== session.user.id) {
+      res.status(403).json({ error: "You are not authorized to view this website" });
+      return;
+    }
+
     const websiteWithLatestTick = {
       ...website,
       latestTick: website.websiteTicks[0] || null,
     };
 
     res.status(200).json(websiteWithLatestTick);
+    return
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
     return;
@@ -149,6 +171,23 @@ export const getWebsiteById = async (req: Request, res: Response) => {
 
 export const getWebsiteTicks = async (req: Request, res: Response) => {
   try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    const token = authHeader.split(" ")[1];
+    const session = await prisma.session.findUnique({
+      where: { token },
+      include: { user: true }
+    });
+
+    if (!session) {
+      res.status(401).json({ error: "Invalid session" });
+      return;
+    }
+
+
     const { websiteId } = req.params;
     const hoursParam = req.query.hours ? Number(req.query.hours) : 24;
     const hours = Number.isFinite(hoursParam) && hoursParam > 0 ? hoursParam : 24;
@@ -156,11 +195,16 @@ export const getWebsiteTicks = async (req: Request, res: Response) => {
 
     const website = await prisma.website.findUnique({
       where: { id: websiteId },
-      select: { id: true },
+      select: { id: true,userId: true },
     });
 
     if (!website) {
       res.status(404).json({ error: "Website not found" });
+      return;
+    }
+
+    if (website.userId !== session.user.id) {
+      res.status(403).json({ error: "You are not authorized to view ticks of this website" });
       return;
     }
 
@@ -185,10 +229,119 @@ export const getWebsiteTicks = async (req: Request, res: Response) => {
       count: ticks.length,
       ticks
     });
-
+    return
   } catch (error) {
     console.error("Error fetching website ticks:", error);
     res.status(500).json({ error: "Internal server error" });
     return;
   }
 }
+
+export const editWebsite = async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    const token = authHeader.split(" ")[1];
+    const session = await prisma.session.findUnique({
+      where: { token },
+      include: { user: true }
+    });
+
+    if (!session) {
+      res.status(401).json({ error: "Invalid session" });
+      return;
+    }
+
+    const { websiteId } = req.params;
+    const { name, url } = req.body;
+
+    if (!name && !url) {
+      res.status(400).json({ error: "At least one of name or url is required to update" });
+      return;
+    }
+
+    const website = await prisma.website.findUnique({ where: { id: websiteId } });
+    if (!website) {
+      res.status(404).json({ error: "Website not found" });
+      return;
+    }
+
+    if (website.userId !== session.user.id) {
+      res.status(403).json({ error: "You are not authorized to edit this website" });
+      return;
+    }
+
+    const urlChanged = url && url !== website.url;
+
+    const updatedWebsite = await prisma.website.update({
+      where: { id: websiteId },
+      data: {
+        ...(name ? { name } : {}),
+        ...(url ? { url } : {})
+      }
+    });
+
+    if (urlChanged) {
+      const monitoringMessage: WebsiteMonitoringMessage = {
+        websiteId: updatedWebsite.id,
+        url: updatedWebsite.url,
+        name: updatedWebsite.name,
+      };
+      await publishToQueue(monitoringMessage);
+    }
+
+    res.status(200).json(updatedWebsite);
+    return;
+
+  } catch (error:any) {
+    console.error("Error editing website :", error.message);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+    return;
+  }
+}
+
+export const deleteWebsite = async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    const token = authHeader.split(" ")[1];
+    const session = await prisma.session.findUnique({
+      where: { token },
+      include: { user: true }
+    });
+
+    if (!session) {
+      res.status(401).json({ error: "Invalid session" });
+      return;
+    }
+
+    const { websiteId } = req.params;
+
+    const website = await prisma.website.findUnique({ where: { id: websiteId } });
+    if (!website) {
+      res.status(404).json({ error: "Website not found" });
+      return;
+    }
+    if (website.userId !== session.user.id) {
+      res.status(403).json({ error: "You are not authorized to delete this website" });
+      return;
+    }
+
+    await prisma.website.delete({ where: { id: websiteId } });
+
+    res.status(200).json({ message: "Website deleted successfully" });
+    return;
+  } catch (error:any) {
+    console.error("Error deleting website :", error.message);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+    return;
+  }
+}
+
+

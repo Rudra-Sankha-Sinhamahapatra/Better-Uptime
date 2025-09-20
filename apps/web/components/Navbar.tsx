@@ -47,9 +47,7 @@ export const Navbar = () => {
                             </Link>
                         </div>
 
-                        {/* Right side - Absolute positioned elements */}
                         <div className="relative w-32 h-10">
-                            {/* Mobile Profile - Absolute left */}
                             <div className="absolute left-0 top-0">
                                 <UserProfile>
                                     {(session: Session | null) => !session ? (
