@@ -4,7 +4,7 @@ import { WebsiteStatus } from "@repo/db/client";
 
 export const checkWebsite = async (url: string) => {
     const startTime = Date.now();    
-    console.log(`🚀 [${new Date().toISOString()}] Starting check for ${url}`);
+    console.log(`[${new Date().toISOString()}] Starting check for ${url}`);
     try {
              console.log(`📡 [${new Date().toISOString()}] Making axios request to ${url}`);
         const response = await axios.get(url, {
@@ -23,7 +23,7 @@ export const checkWebsite = async (url: string) => {
                httpAgent: false,
         });
 
-        console.log(`✅ Got response from ${url}: ${response.status}`);
+        console.log(`Got response from ${url}: ${response.status}`);
         const result = {
             responseTimeMs: Date.now() - startTime,
             status: response.status >= 200 && response.status < 400
@@ -33,7 +33,7 @@ export const checkWebsite = async (url: string) => {
             statusText: response.statusText,
             contentType: response.headers['content-type']
         };
-        console.log(`🎉 Check result for ${url}:`, result);
+        console.log(`Check result for ${url}:`, result);
 
         return result;
     } catch (error: any) {

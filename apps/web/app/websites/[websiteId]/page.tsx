@@ -382,7 +382,7 @@ export default function WebsiteDetailPage() {
         transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
       />
       <div className="relative z-10 max-w-7xl mx-auto px-6 pt-12 pb-16">
-        <div className="mb-8 text-center">
+        <div className="mb-8 mt-16 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-white via-green-400 to-white bg-clip-text text-transparent">
             {website.name}
           </h1>

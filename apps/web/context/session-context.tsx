@@ -12,13 +12,13 @@ interface SessionContextType {
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
-export function SessionProvider({ children }: { children: ReactNode }) {
-    const [session, setSession] = useState<Session | null>(null);
-    const [loading, setLoading] = useState(true);
+export function SessionProvider({ children,  initialSession  }: { children: ReactNode, initialSession?: Session | null }) {
+    const [session, setSession] = useState<Session | null>(initialSession ?? null);
+    const [loading, setLoading] = useState(!initialSession);
 
     const fetchSession = async () => {
         try {
-            const response = await authClient.getSession();
+            const response = await authClient.getSession({});
             if ('data' in response && response.data) {
                 setSession(response.data as Session);
             } else {
@@ -38,8 +38,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
 
     useEffect(() => {
-        fetchSession();
-    },[]);
+        if (!initialSession) {
+          fetchSession();
+        }
+      }, [initialSession]);
 
     return (
         <SessionContext.Provider value={{ session, loading, refreshSession }}>

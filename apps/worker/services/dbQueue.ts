@@ -8,9 +8,9 @@ const MAX_RETRIES = 3;
 
 export const queueDbOperation = async (data: DbJob) => {
     const jobWithRetries = { ...data, retries: 0 };
-    console.log("➡️ [queueDbOperation] About to lpush to Redis");
+    console.log("[queueDbOperation] About to lpush to Redis");
     await producer.lpush(QUEUE_NAME, JSON.stringify(jobWithRetries));
-    console.log("✅ [queueDbOperation] lpush done");
+    console.log("[queueDbOperation] lpush done");
 };
 
 export const startDbQueueProcessor = async () => {

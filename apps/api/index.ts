@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
-import { allWebsites, createWebsite, getWebsiteById, getWebsiteTicks } from "./controllers/website";
+import { allWebsites, createWebsite, deleteWebsite, editWebsite, getWebsiteById, getWebsiteTicks } from "./controllers/website";
 import { connectToRabbitMQ } from "./services/rabbitmq";
 import { config } from "./config";
 import { shutdown } from "./utils/shutdown";
@@ -31,6 +31,10 @@ app.get("/website/:websiteId/ticks", getWebsiteTicks);
 app.post("/website", createWebsite);
 
 app.get("/website/:websiteId", getWebsiteById);
+
+app.put("/website/:websiteId", editWebsite);
+
+app.delete("/website/:websiteId", deleteWebsite);
 
 app.post("/contact", submitContactForm);
 

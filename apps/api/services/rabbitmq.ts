@@ -17,23 +17,23 @@ export async function connectToRabbitMQ() {
         connection = await amqp.connect(config.rabbitmq.rabbitMqUrl as string);
 
         connection.on('error', (err) => {
-            console.error('🔴 RabbitMQ Connection Error:', err);
+            console.error('RabbitMQ Connection Error:', err);
             channel = null;
         });
 
         connection.on('close', () => {
-            console.log('🔴 RabbitMQ Connection Closed');
+            console.log('RabbitMQ Connection Closed');
             channel = null;
         });
         
         channel = await connection.createConfirmChannel();
 
         channel.on('error', (err) => {
-            console.error('🔴 RabbitMQ Channel Error:', err);
+            console.error('RabbitMQ Channel Error:', err);
         });
 
         channel.on('close', () => {
-            console.log('🔴 RabbitMQ Channel Closed');
+            console.log('RabbitMQ Channel Closed');
         });
 
         await channel.assertQueue(config.rabbitmq.queueName, {

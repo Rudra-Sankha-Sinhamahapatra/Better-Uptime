@@ -36,10 +36,10 @@ export const processMessage = async (
             url: data.url,
         });
 
-        console.log("🔄 About to call checkWebsite for:", data.url);
+        console.log("About to call checkWebsite for:", data.url);
         const result = await checkWebsite(data.url);
 
-        console.log("🔄 checkWebsite returned:", result);
+        // console.log("checkWebsite returned:", result);
 
         if (!result) {
             console.error("No result from checkWebsite", data.url);
@@ -47,7 +47,7 @@ export const processMessage = async (
             return;
         }
 
-        console.log("🔄 About to queue DB operation");
+        console.log("About to queue DB operation");
 
         try {
             await queueDbOperation({
@@ -59,10 +59,10 @@ export const processMessage = async (
                 url: data.url,
                 previousStatus: data.previousStatus as WebsiteStatus || WebsiteStatus.Unknown,
             });
-            console.log("✅ DB operation queued successfully");
+            console.log("DB operation queued successfully");
         } catch (error: any) {
-            console.error("❌ DB operation failed:", error.message);
-            console.error("❌ Error details:", error);
+            console.error("DB operation failed:", error.message);
+            console.error("Error details:", error);
         }
 
         console.log(`Check completed for ${data.url}:`, result);

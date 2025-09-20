@@ -8,7 +8,7 @@ export default function AboutPage() {
       <HeroGradient />
 
       <div className="relative z-10 text-white text-center max-w-4xl">
-        <h1 className="text-5xl font-bold mb-8 bg-gradient-to-r from-white via-green-400 to-white bg-clip-text text-transparent">
+        <h1 className="text-5xl font-bold mb-8 mt-20 bg-gradient-to-r from-white via-green-400 to-white bg-clip-text text-transparent">
           About BetterUptime
         </h1>
 
