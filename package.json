@@ -10,7 +10,7 @@
     "start:backend": "cd apps/api && bun run dev",
     "start:worker": "cd apps/worker && bun run dev",
     "prisma:generate": "cd packages/db && bunx prisma generate && cd ../..",
-    "db:local": "docker run -d -e POSTGRES_PASSWORD=rick -p 5432:5432 postgres"
+    "db:local": "docker run -d -e POSTGRES_PASSWORD=nobody_cares -p 5432:5432 postgres"
   },
   "devDependencies": {
     "prettier": "^3.5.3",
